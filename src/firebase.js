@@ -1,0 +1,27 @@
+import { getApp, getApps, initializeApp } from "firebase/app";
+
+const env = import.meta.env;
+
+export const firebaseConfig = {
+
+  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyCrBn-SGY7W0m1z0O7wtCq2OAl_eNSkSmA",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "aureumpay-28c7a.firebaseapp.com",
+  databaseURL: env.VITE_FIREBASE_DATABASE_URL,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || "aureumpay-28c7a",
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "aureumpay-28c7a.firebasestorage.app",
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "698444813351",
+  appId: env.VITE_FIREBASE_APP_ID || "1:698444813351:web:ffc82dfd1ea2a6a648ea02",
+};
+
+const requiredConfigKeys = ["apiKey", "authDomain", "databaseURL", "projectId", "appId"];
+
+export const isFirebaseConfigured = requiredConfigKeys.every((key) => {
+  const value = firebaseConfig[key];
+  return typeof value === "string" && value.trim().length > 0;
+});
+
+export const app = isFirebaseConfigured
+  ? getApps().length > 0
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0E2A1F" />
+    <title>Aureumpay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,440;0,9..144,560;1,9..144,440&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Nunito:wght@400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" />
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              bg: "#FAF8F3",
+              forest: "#0E2A1F",
+              forestdeep: "#081C13",
+              leaf: "#1E8F52",
+              leafbright: "#2FBE73",
+              gold: "#C98A2C",
+              mint: "#BEF0CF",
+              ink: "#0E2A1F",
+              soft: "#5B6F62",
+            },
+            fontFamily: { display: ["Fraunces", "serif"] },
+            keyframes: {
+              popIn: {
+                "0%": { transform: "scale(.6)", opacity: "0" },
+                "60%": { transform: "scale(1.05)" },
+                "100%": { transform: "scale(1)", opacity: "1" },
+              },
+              shake: {
+                "0%,100%": { transform: "translateX(0)" },
+                "20%": { transform: "translateX(-6px)" },
+                "40%": { transform: "translateX(6px)" },
+                "60%": { transform: "translateX(-4px)" },
+                "80%": { transform: "translateX(4px)" },
+              },
+              spin: { "100%": { transform: "rotate(360deg)" } },
+            },
+            animation: {
+              popIn: "popIn .4s cubic-bezier(.19,1,.22,1) forwards",
+              shake: "shake .4s ease",
+              spinslow: "spin 1s linear infinite",
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
