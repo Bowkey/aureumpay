@@ -227,6 +227,18 @@ export default function AdminPage() {
       <button id="umApproveBtn" className="btn-mint font-medium text-[13.5px] py-2.5 w-full">Approve &amp; activate account</button>
       <button id="umDeactivateBtn" className="btn-ghost font-medium text-[13.5px] py-2.5 w-full hidden">Set back to inactive</button>
     </div>
+{/* Administration */}
+<div className="surface-2 p-4 mb-4">
+  <p className="font-serif text-[15px] mb-1">Administration</p>
+  <p className="help-sm mb-3">Only users with existing admin access can grant it to others. The custom <code>admin</code> claim is the real database-rules gate and can only be minted through the Admin SDK (scripts/set-admin.js).</p>
+  <div className="flex gap-2">
+    <button id="umPromoteBtn" className="btn-mint font-medium text-[13.5px] py-2.5 flex-1">Make admin</button>
+    <button id="umDemoteBtn" className="btn-ghost font-medium text-[13.5px] py-2.5 flex-1 hidden">Remove admin</button>
+  </div>
+</div>
+
+{/* Account approval */}
+
 
     <div className="surface-2 p-4 mb-4">
       <p className="font-serif text-[15px] mb-3">Adjust balance</p>

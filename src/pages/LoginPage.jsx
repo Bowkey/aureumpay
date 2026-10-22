@@ -16,7 +16,7 @@ export default function LoginPage() {
 <div className="min-h-screen lg:grid lg:grid-cols-2">
 
   {/* ============ LEFT — brand panel, hidden below lg ============ */}
-  <div className="relative hidden lg:flex flex-col justify-between overflow-hidden px-14 py-14" style={{background: 'linear-gradient(160deg, var(--forest) 0%, var(--forest-2) 60%, #0A2118 100%)'}}>
+  <div className="relative hidden lg:flex flex-col justify-between overflow-hidden px-14 py-14" style={{background: 'linear-gradient(160deg, var(--forest) 0%, var(--forest-2) 60%, #0C2545 100%)'}}>
     <div className="grain"></div>
     <div className="watermark absolute -bottom-10 -left-6 select-none">Aureumpay</div>
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
       <div className="flex items-center gap-3 mt-8">
         <div className="w-9 h-9 rounded-full flex items-center justify-center font-mono text-xs shrink-0" style={{background: 'rgba(251,250,246,.12)', color: 'var(--paper)'}}>MO</div>
         <div>
-          <p className="text-sm text-[var(--paper)]">Maya Okonkwo</p>
+          <p className="text-sm text-[var(--paper)]">Maya Grey</p>
           <p className="font-mono text-[11px] text-[var(--paper)]/45">Founder, Studio Fern</p>
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function LoginPage() {
 
         {/* ---------- RESET SENT CONFIRMATION ---------- */}
         <div id="sentPanel" className="panel-swap panel-hidden text-center">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6" style={{background: 'rgba(30,143,82,.1)'}}>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6" style={{background: 'rgba(37,99,200,.1)'}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6.5 12 13l8-6.5M4 6.5h16v11H4v-11Z" stroke="var(--leaf)" strokeWidth="1.6" strokeLinejoin="round"/></svg>
           </div>
           <h1 className="font-serif font-medium text-3xl tracking-tight mb-2">Check your email.</h1>

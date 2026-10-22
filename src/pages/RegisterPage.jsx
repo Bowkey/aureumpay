@@ -76,12 +76,12 @@ export default function RegisterPage() {
       <div className="grid sm:grid-cols-2 gap-5">
         <div>
           <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--forest)]/50 block mb-2">First name</label>
-          <input id="firstName" type="text" placeholder="Ade" className="field-input"/>
+          <input id="firstName" type="text" placeholder="Jane" className="field-input"/>
           <p id="firstNameMsg" className="field-msg text-xs mt-1.5 hidden"></p>
         </div>
         <div>
           <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--forest)]/50 block mb-2">Last name</label>
-          <input id="lastName" type="text" placeholder="Bello" className="field-input"/>
+          <input id="lastName" type="text" placeholder="Doe" className="field-input"/>
           <p id="lastNameMsg" className="field-msg text-xs mt-1.5 hidden"></p>
         </div>
       </div>
@@ -290,7 +290,7 @@ export default function RegisterPage() {
 {/* ============ SUCCESS MODAL ============ */}
 <div id="successOverlay">
   <div id="successCard" className="w-full max-w-[420px] rounded-md p-8 sm:p-10 text-center" style={{background: 'var(--paper)'}}>
-    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{background: 'rgba(30,143,82,.1)'}}>
+    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{background: 'rgba(37,99,200,.1)'}}>
       <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
         <circle cx="15" cy="15" r="13" stroke="var(--leaf)" strokeWidth="1.6"/>
         <path className="check-circle-path" d="M9 15.5 13 19.5 21 10.5" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

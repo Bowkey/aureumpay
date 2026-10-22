@@ -7,6 +7,7 @@ import {
     browserLocalPersistence,
     browserSessionPersistence
   } from "firebase/auth";
+import { getDatabase, get, ref } from "firebase/database";
 
 export function mountPage(navigate) {
   // ---- Replace with your own Firebase project config ----
@@ -128,10 +129,20 @@ export function mountPage(navigate) {
   
       try{
         await setPersistence(auth, $('rememberMe').checked ? browserLocalPersistence : browserSessionPersistence);
-        await signInWithEmailAndPassword(auth, email, password);
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        const token = await credential.user.getIdTokenResult(true);
+        let isAdmin = token.claims.admin === true;
+
+        if(!isAdmin){
+          const adminRecord = await get(ref(getDatabase(app), `admins/${credential.user.uid}`));
+          const record = adminRecord.val();
+          isAdmin = !!record && record.enabled !== false;
+        }
+
         showToast('Welcome back — redirecting…');
-        navigate('/dashboard');
+        navigate(isAdmin ? '/admin' : '/dashboard');
       } catch(err){
+        console.error('Unable to complete sign-in or verify admin access:', err);
         showToast(friendlyAuthError(err), true);
       } finally {
         setLoading(btn, label, false, '', 'Log in');

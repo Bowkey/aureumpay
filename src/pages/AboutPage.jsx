@@ -361,7 +361,7 @@ export default function AboutPage() {
       </form>
     </div>
 
-    <div className="rule" style={{background: 'rgba(190,240,207,.16)'}}></div>
+    <div className="rule" style={{background: 'rgba(213,229,255,.16)'}}></div>
 
     <div className="reveal grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-10 py-14 sm:py-16" style={{transitionDelay: '.06s'}}>
 
@@ -406,7 +406,7 @@ export default function AboutPage() {
       </div>
     </div>
 
-    <div className="rule" style={{background: 'rgba(190,240,207,.16)'}}></div>
+    <div className="rule" style={{background: 'rgba(213,229,255,.16)'}}></div>
 
     <div className="reveal flex flex-col-reverse sm:flex-row items-center sm:items-center justify-between gap-6 pt-8 text-center sm:text-left" style={{transitionDelay: '.12s'}}>
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6">

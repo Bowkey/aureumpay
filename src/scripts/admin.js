@@ -13,6 +13,8 @@ export function mountPage() {
     let allTx = [];           // flat array of {id, ...tx}
     let activeUid = null;
     let depositSettings = {}; // settings/deposit from Firebase (bank + crypto coins)
+    let adminUids = {};        // uid -> admin record (from `admins`)
+    let currentAdminUid = null; // uid of the signed-in administrator
   
     /* ---------- helpers ---------- */
     function showToast(message, tone = "ink") {
@@ -97,6 +99,7 @@ export function mountPage() {
         }
         const allowed = await checkIsAdmin(user);
         if (allowed) {
+          currentAdminUid = user.uid;
           $("loginGate").classList.add("hidden");
           $("appShell").classList.remove("hidden");
           wireDataListeners();
@@ -145,9 +148,11 @@ export function mountPage() {
     async function checkIsAdmin(user) {
       // 1. custom claim
       try {
-        const token = await user.getIdTokenResult();
+        const token = await user.getIdTokenResult(true);
         if (token && token.claims && token.claims.admin === true) return true;
-      } catch (err) { /* fall through to the other checks */ }
+      } catch (err) {
+        console.error("Could not refresh admin credentials:", err);
+      }
 
       // 2. database record
       try {
@@ -161,16 +166,38 @@ export function mountPage() {
 
     /* ---------- data listeners ---------- */
     function wireDataListeners() {
-      onValue(ref(db, "users"), (snap) => { allUsers = snap.val() || {}; renderUsers(); renderOverview(); renderAllTxTables(); });
+      onValue(ref(db, "users"), (snap) => {
+        allUsers = snap.val() || {};
+        renderUsers();
+        renderOverview();
+        renderAllTxTables();
+      }, (err) => {
+        console.error("Could not load user profiles:", err);
+        showToast("Could not load user details. Check the deployed Realtime Database rules.", "rose");
+      });
       onValue(ref(db, "transactions"), (snap) => {
         const val = snap.val() || {};
         allTx = Object.entries(val).map(([id, tx]) => ({ id, ...tx })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         renderOverview(); renderAllTxTables();
         if (activeUid) renderUserTx(activeUid);
+      }, (err) => {
+        console.error("Could not load transactions:", err);
+        showToast("Could not load transaction details. Check the deployed Realtime Database rules.", "rose");
       });
       onValue(ref(db, "settings/deposit"), (snap) => {
         depositSettings = snap.val() || {};
         renderDepositSettingsUI();
+      }, (err) => {
+        console.error("Could not load deposit settings:", err);
+        showToast("Could not load deposit settings. Check the deployed Realtime Database rules.", "rose");
+      });
+      onValue(ref(db, "admins"), (snap) => {
+        adminUids = snap.val() || {};
+        renderUsers();
+        if (activeUid) openUserModal(activeUid);
+      }, (err) => {
+        console.error("Could not load admin records:", err);
+        showToast("Could not load admin records. Check the deployed Realtime Database rules.", "rose");
       });
     }
   
@@ -355,6 +382,37 @@ export function mountPage() {
     }
     ["umPin1", "umPin2", "umPin3", "umPin4"].forEach(wirePinInput);
   
+    /* ---------- promote / demote admin ---------- */
+    async function promoteToAdmin(uid) {
+      const u = allUsers[uid] || {};
+      const name = u.fullName || u.email || "this user";
+      if (!confirm(`Give ${name} admin access?\n\nThey will be able to approve transactions, adjust balances and manage every account in this console.`)) return;
+      try {
+        await set(ref(db, `admins/${uid}`), {
+          email: u.email || "",
+          role: "admin",
+          enabled: true,
+          promotedAt: new Date().toISOString(),
+          promotedBy: currentAdminUid,
+        });
+        showToast("Admin access granted", "mint");
+      } catch (err) {
+        showToast("Could not grant admin access — check database rules.", "rose");
+      }
+    }
+
+    async function demoteAdmin(uid) {
+      const u = allUsers[uid] || {};
+      const name = u.fullName || u.email || "this user";
+      if (!confirm(`Remove admin access from ${name}?`)) return;
+      try {
+        await remove(ref(db, `admins/${uid}`));
+        showToast("Admin access removed", "ink");
+      } catch (err) {
+        showToast("Could not remove admin access — check database rules.", "rose");
+      }
+    }
+
     /* ---------- user modal ---------- */
     function openUserModal(uid) {
       activeUid = uid;
@@ -383,6 +441,10 @@ export function mountPage() {
       $("umApproveBtn").classList.toggle("hidden", isActive);
       $("umDeactivateBtn").classList.toggle("hidden", !isActive);
   
+      const isAdmin = !!adminUids[activeUid];
+      $("umPromoteBtn").classList.toggle("hidden", activeUid === currentAdminUid || isAdmin);
+      $("umDemoteBtn").classList.toggle("hidden", activeUid === currentAdminUid || !isAdmin);
+
       const pins = u.withdrawalPins || {};
       $("umPin1").value = pins.pin1 || "";
       $("umPin2").value = pins.pin2 || "";

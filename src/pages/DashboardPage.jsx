@@ -14,7 +14,7 @@ export default function DashboardPage() {
 
 {/* ============ Auth gate / loading ============ */}
 <div id="authGate" className="min-h-screen flex flex-col items-center justify-center gap-4">
-  <svg className="animate-spinslow" width="30" height="30" viewBox="0 0 24 24" fill="none"><circle className="spinner-sm" cx="12" cy="12" r="9" stroke="#1E8F52" strokeWidth="3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="#1E8F52" strokeWidth="3" strokeLinecap="round"/></svg>
+  <svg className="animate-spinslow" width="30" height="30" viewBox="0 0 24 24" fill="none"><circle className="spinner-sm" cx="12" cy="12" r="9" stroke="#2563C8" strokeWidth="3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="#2563C8" strokeWidth="3" strokeLinecap="round"/></svg>
   <p className="text-muted2 text-[13px] font-mono uppercase tracking-[0.14em]">Loading your dashboard…</p>
 </div>
 
@@ -93,7 +93,7 @@ export default function DashboardPage() {
 
         <div className="hero-card p-6 sm:p-8 mb-6">
           <div id="acctStatusPill" className="status-pill relative z-10 mb-4" style={{background: 'rgba(255,255,255,.14)'}}>
-            <span id="acctStatusDot" className="w-1.5 h-1.5 rounded-full" style={{background: '#2FBE73'}}></span>
+            <span id="acctStatusDot" className="w-1.5 h-1.5 rounded-full" style={{background: '#4B8EF5'}}></span>
             <span id="acctStatusText" className="text-[10.5px] font-mono uppercase tracking-[0.1em] text-white">Active</span>
           </div>
           <p className="relative z-10 text-white/70 text-[11px] font-mono uppercase tracking-[0.18em] mb-2" data-i18n="overview.balance">Available balance</p>
@@ -112,29 +112,29 @@ export default function DashboardPage() {
             <span id="qaDepositLock" className="hidden absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center" style={{background: 'rgba(201,138,44,.15)'}}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </span>
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1E8F52" strokeWidth="2"><path d="M12 21V7m0 14-4.5-4.5M12 21l4.5-4.5M4 4h16"/></svg>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M12 21V7m0 14-4.5-4.5M12 21l4.5-4.5M4 4h16"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="nav.deposit">Deposit</span>
           </button>
           <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="transfer">
             <span id="qaTransferLock" className="hidden absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center" style={{background: 'rgba(201,138,44,.15)'}}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </span>
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1E8F52" strokeWidth="2"><path d="M7 7h13M7 7l4-4M7 7l4 4M17 17H4M17 17l-4-4M17 17l-4 4"/></svg>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M7 7h13M7 7l4-4M7 7l4 4M17 17H4M17 17l-4-4M17 17l-4 4"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="nav.transfer">Transfer</span>
           </button>
           <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="withdraw">
             <span id="qaWithdrawLock" className="hidden absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center" style={{background: 'rgba(201,138,44,.15)'}}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </span>
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1E8F52" strokeWidth="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="nav.withdraw">Withdraw</span>
           </button>
           <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="cards">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1E8F52" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19"/></svg>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="cards.apply">Apply for card</span>
           </button>
           <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="loans">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1E8F52" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="loans.apply">Apply for loan</span>
           </button>
         </div>

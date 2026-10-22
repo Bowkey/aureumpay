@@ -139,7 +139,7 @@ export default function HomePage() {
 
         <div className="flex items-center justify-between mb-2">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/45">Statement · July</p>
-          <span className="flex items-center gap-1.5 text-[11px] font-mono px-3 py-1.5 rounded-full" style={{color: 'var(--leaf)', background: 'rgba(30,143,82,.08)'}}>
+          <span className="flex items-center gap-1.5 text-[11px] font-mono px-3 py-1.5 rounded-full" style={{color: 'var(--leaf)', background: 'rgba(37,99,200,.08)'}}>
             <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{background: 'var(--leaf-bright)'}}></span>
             +<span className="countup" data-target="12.4" data-decimals="1">0</span>%
           </span>
@@ -328,7 +328,7 @@ export default function HomePage() {
 
         {/* front card — deliberately stays a dark forest card in both themes, like a physical card mockup */}
         <div id="cardVisual" className="relative rounded-2xl aspect-[1.586] p-7 sm:p-8 flex flex-col justify-between"
-             style={{background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 55%, #0A2118 100%)', boxShadow: '0 40px 70px -25px rgba(14,42,31,.45)', color: 'var(--onDark)'}}>
+             style={{background: 'linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 55%, #0C2545 100%)', boxShadow: '0 40px 70px -25px rgba(16,43,78,.45)', color: 'var(--onDark)'}}>
 
           <div className="flex items-start justify-between">
             <span className="font-serif italic-serif text-xl tracking-tight">Aureumpay</span>
@@ -619,7 +619,7 @@ export default function HomePage() {
       </form>
     </div>
 
-    <div className="rule" style={{background: 'rgba(190,240,207,.16)'}}></div>
+    <div className="rule" style={{background: 'rgba(213,229,255,.16)'}}></div>
 
     {/* link columns, 2-up on mobile, 4-up from sm, 5-up on desktop */}
     <div className="reveal grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-10 py-14 sm:py-16" style={{transitionDelay: '.06s'}}>
@@ -665,7 +665,7 @@ export default function HomePage() {
       </div>
     </div>
 
-    <div className="rule" style={{background: 'rgba(190,240,207,.16)'}}></div>
+    <div className="rule" style={{background: 'rgba(213,229,255,.16)'}}></div>
 
     {/* bottom bar: legal + socials, stacks on mobile */}
     <div className="reveal flex flex-col-reverse sm:flex-row items-center sm:items-center justify-between gap-6 pt-8 text-center sm:text-left" style={{transitionDelay: '.12s'}}>

@@ -1,0 +1,6 @@
+{
+  "database": {
+    "rules": "database.rules.json",
+    "projectId": "aureumpay-28c7a"
+  }
+}

@@ -28,7 +28,7 @@ export function mountPage(navigate) {
     }
     function setAlert(el, message, tone = "rose") {
       if (!message) { el.classList.add("hidden"); el.textContent = ""; return; }
-      const tones = { rose: "bg-[rgba(179,67,43,.08)] text-[var(--error)]", mint: "bg-[rgba(30,143,82,.1)] text-[var(--leaf)]" };
+      const tones = { rose: "bg-[rgba(179,67,43,.08)] text-[var(--error)]", mint: "bg-[rgba(37,99,200,.1)] text-[var(--leaf)]" };
       el.className = `mb-4 rounded px-4 py-3 text-[13px] font-medium ${tones[tone] || tones.rose}`;
       el.textContent = message;
       el.classList.remove("hidden");
@@ -266,7 +266,7 @@ export function mountPage(navigate) {
   
     /* ---------- card types (colored) ---------- */
     const CARD_TYPES = [
-      { id: "virtual", name: "Virtual Card", fee: 0, desc: "Instant virtual card for online payments.", grad: "from-leaf via-[#2FBE73] to-forest" },
+      { id: "virtual", name: "Virtual Card", fee: 0, desc: "Instant virtual card for online payments.", grad: "from-leaf via-[#4B8EF5] to-forest" },
       { id: "standard", name: "Standard Physical Debit", fee: 1500, desc: "Classic debit card, delivered in 5–7 business days.", grad: "from-forest to-forestdeep" },
       { id: "gold", name: "Gold Physical Debit", fee: 5000, desc: "Higher limits and premium perks.", grad: "from-[#C9962C] via-[#E9C46A] to-[#9C6B1F]" },
       { id: "platinum", name: "Platinum Metal Card", fee: 15000, desc: "Metal card, highest limits, concierge support.", grad: "from-[#6E7681] via-[#B7BEC7] to-[#4A5058]" },
@@ -669,7 +669,7 @@ export function mountPage(navigate) {
   
       const isActivePill = $("acctStatusPill");
       isActivePill.style.background = isActive ? "rgba(255,255,255,.14)" : "rgba(179,67,43,.28)";
-      $("acctStatusDot").style.background = isActive ? "#2FBE73" : "#F2A2A2";
+      $("acctStatusDot").style.background = isActive ? "#4B8EF5" : "#F2A2A2";
       $("acctStatusText").textContent = isActive ? "Active" : "Inactive";
   
       ["qaDepositLock", "qaTransferLock", "qaWithdrawLock"].forEach((id) => {

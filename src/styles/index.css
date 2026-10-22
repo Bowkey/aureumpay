@@ -1,31 +1,28 @@
 
   :root{
-    --forest:#0E2A1F;
-    --forest-2:#123723;
-    --leaf:#1E8F52;
-    --leaf-bright:#2FBE73;
-    --paper:#FBFAF6;
-    --paper-2:#F1F6F1;
-    --sage:#9DB9A8;
-    --mint:#BEF0CF;
-    --line:rgba(14,42,31,.12);
-    /* --ink is the page's foreground/text color. It starts equal to --forest,
-       but unlike --forest (which stays a constant deep green for buttons, the
-       card visual, the seal badge, etc.) it flips to a light tone in dark mode. */
-    --ink:#0E2A1F;
-    --caption:rgba(14,42,31,.4);
-    /* --onDark never changes with the theme — it's the fixed light text color
-       used on elements that are always dark regardless of site theme, like the
-       card visual, the footer, and the featured testimonial avatar. */
-    --onDark:#FBFAF6;
+    --forest:#102B4E;
+    --forest-2:#173D6B;
+    --leaf:#2563C8;
+    --leaf-bright:#4B8EF5;
+    --paper:#FCFDFF;
+    --paper-2:#EEF4FC;
+    --sage:#9BB4D3;
+    --mint:#D5E5FF;
+    --line:rgba(16,43,78,.12);
+    /* --ink is the page foreground color; --forest remains the constant navy
+       used for buttons, the card visual, and other always-dark elements. */
+    --ink:#102B4E;
+    --caption:rgba(16,43,78,.4);
+    /* --onDark is the fixed light text color used on always-dark elements. */
+    --onDark:#FCFDFF;
   }
   html.dark{
-    --paper:#0B1710;
-    --paper-2:#132018;
-    --line:rgba(190,240,207,.13);
-    --ink:#EDF3EC;
-    --caption:rgba(237,243,236,.45);
-    --sage:#8FB09E;
+    --paper:#091525;
+    --paper-2:#10233D;
+    --line:rgba(213,229,255,.13);
+    --ink:#EEF4FC;
+    --caption:rgba(238,244,252,.45);
+    --sage:#A1B4CC;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -71,8 +68,8 @@
 
   .pulse-dot{ animation:pulse 2.4s ease-in-out infinite; }
   @keyframes pulse{
-    0%,100%{ box-shadow:0 0 0 0 rgba(47,190,115,.4); }
-    50%{ box-shadow:0 0 0 7px rgba(47,190,115,0); }
+    0%,100%{ box-shadow:0 0 0 0 rgba(75,142,245,.4); }
+    50%{ box-shadow:0 0 0 7px rgba(75,142,245,0); }
   }
 
   /* fill-sweep button */
@@ -95,13 +92,13 @@
   .ledger-card{
     background:var(--paper-2);
     border:1px solid var(--line);
-    box-shadow:0 1px 2px rgba(14,42,31,.04), 0 30px 60px -25px rgba(14,42,31,.28);
+    box-shadow:0 1px 2px rgba(16,43,78,.04), 0 30px 60px -25px rgba(16,43,78,.28);
     transition:transform .5s cubic-bezier(.19,1,.22,1), box-shadow .5s ease, background-color .4s ease, border-color .4s ease;
     transform-style:preserve-3d;
     will-change:transform;
   }
   .ledger-card:hover{
-    box-shadow:0 1px 2px rgba(14,42,31,.05), 0 40px 70px -25px rgba(14,42,31,.34);
+    box-shadow:0 1px 2px rgba(16,43,78,.05), 0 40px 70px -25px rgba(16,43,78,.34);
   }
 
   .float-note{ animation:floatNote 5s ease-in-out infinite; }
@@ -159,8 +156,8 @@
   }
   .acct-card:hover{
     transform:translateY(-6px);
-    box-shadow:0 24px 50px -22px rgba(14,42,31,.3);
-    border-color:rgba(14,42,31,.22);
+    box-shadow:0 24px 50px -22px rgba(16,43,78,.3);
+    border-color:rgba(16,43,78,.22);
   }
   .acct-dot{ transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
   .acct-card:hover .acct-dot{ transform:scale(1.3); }
