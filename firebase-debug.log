@@ -1,0 +1,29 @@
+[debug] [2026-10-22T15:07:07.985Z] ----------------------------------------------------------------------
+[debug] [2026-10-22T15:07:07.995Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Favour\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js projects:list
+[debug] [2026-10-22T15:07:07.997Z] CLI Version:   15.26.0
+[debug] [2026-10-22T15:07:07.997Z] Platform:      win32
+[debug] [2026-10-22T15:07:07.998Z] Node Version:  v24.14.0
+[debug] [2026-10-22T15:07:07.998Z] Detected Agent: cline
+[debug] [2026-10-22T15:07:07.999Z] Time:          Thu Oct 22 2026 16:07:07 GMT+0100 (West Africa Time)
+[debug] [2026-10-22T15:07:07.999Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-22T15:07:08.027Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-22T15:07:08.028Z] > authorizing via signed-in user (realjason93@gmail.com)
+[debug] [2026-10-22T15:07:08.088Z] Checked if tokens are valid: true, expires at: 1792684189498
+[debug] [2026-10-22T15:07:08.089Z] Checked if tokens are valid: true, expires at: 1792684189498
+[debug] [2026-10-22T15:07:08.093Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-10-22T15:07:09.314Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-10-22T15:07:09.315Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] ┌──────────────────────┬─────────────────────┬────────────────┬──────────────────────┐
+│ Project Display Name │ Project ID          │ Project Number │ Resource Location ID │
+├──────────────────────┼─────────────────────┼────────────────┼──────────────────────┤
+│ auth-test            │ auth-test-18d12     │ 959384153887   │ [Not specified]      │
+├──────────────────────┼─────────────────────┼────────────────┼──────────────────────┤
+│ cfcs                 │ cfcs-6ed69          │ 684300855416   │ [Not specified]      │
+├──────────────────────┼─────────────────────┼────────────────┼──────────────────────┤
+│ firebase-firestore   │ fir-firestore-ca14a │ 518072163546   │ [Not specified]      │
+├──────────────────────┼─────────────────────┼────────────────┼──────────────────────┤
+│ UniBank              │ unibank-79b44       │ 258313660263   │ [Not specified]      │
+└──────────────────────┴─────────────────────┴────────────────┴──────────────────────┘
+[info] 
+[info] 4 project(s) total.

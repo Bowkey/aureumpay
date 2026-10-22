@@ -20,6 +20,22 @@ export const isFirebaseConfigured = requiredConfigKeys.every((key) => {
   return typeof value === "string" && value.trim().length > 0;
 });
 
+/* ---------- admin allowlist ----------
+ * Comma-separated list of emails that are always allowed into the admin
+ * console, regardless of what the database says. This is the bootstrap path:
+ * it lets the very first administrator reach the console before any
+ * `admins/{uid}` record exists (and before the custom `admin` claim has been
+ * minted). Anyone else must be promoted at runtime through the admin console.
+ */
+export const ADMIN_EMAILS = (env.VITE_ADMIN_EMAILS || "admin@gmail.com")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
+
+export function isAdminEmail(email) {
+  return typeof email === "string" && ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 export const app = isFirebaseConfigured
   ? getApps().length > 0
     ? getApp()

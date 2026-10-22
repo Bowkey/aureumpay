@@ -1,6 +1,6 @@
-import { app, isFirebaseConfigured } from "../firebase.js";
+import { app, isFirebaseConfigured, isAdminEmail } from "../firebase.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { getDatabase, ref, onValue, update, remove } from "firebase/database";
+import { getDatabase, ref, onValue, update, remove, get, set } from "firebase/database";
 
 export function mountPage() {
   const ADMIN_EMAIL = "admin@gmail.com";
@@ -68,11 +68,10 @@ export function mountPage() {
         return;
       }
 
-      if (email.toLowerCase() !== ADMIN_EMAIL) {
-        $("loginError").textContent = "Invalid admin credentials.";
-        $("loginError").classList.remove("hidden");
-        return;
-      }
+      // NOTE: we deliberately do not gate on the email allowlist here. A user
+      // promoted at runtime (admins/{uid}) is not in VITE_ADMIN_EMAILS, so
+      // rejecting them at the form would lock them out. Access is decided in
+      // onAuthStateChanged once we can read the admins node and the auth token.
       $("loginSubmitBtn").disabled = true;
       $("loginSubmitLabel").innerHTML = '<span class="spinner"></span>';
       try {
@@ -88,16 +87,27 @@ export function mountPage() {
     $("logoutBtn").addEventListener("click", async () => { await signOut(auth); });
   
     if (auth) {
-      onAuthStateChanged(auth, (user) => {
-        if (user && user.email && user.email.toLowerCase() === ADMIN_EMAIL) {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          $("appShell").classList.add("hidden");
+          $("loginGate").classList.remove("hidden");
+          $("loginSubmitBtn").disabled = false;
+          $("loginSubmitLabel").textContent = "Sign in";
+          return;
+        }
+        const allowed = await checkIsAdmin(user);
+        if (allowed) {
           $("loginGate").classList.add("hidden");
           $("appShell").classList.remove("hidden");
           wireDataListeners();
         } else {
           $("appShell").classList.add("hidden");
           $("loginGate").classList.remove("hidden");
+          $("loginError").textContent = "This account does not have admin access.";
+          $("loginError").classList.remove("hidden");
           $("loginSubmitBtn").disabled = false;
           $("loginSubmitLabel").textContent = "Sign in";
+          await signOut(auth);
         }
       });
     } else {
@@ -125,6 +135,30 @@ export function mountPage() {
     window.addEventListener("resize", syncSidebarForViewport);
     syncSidebarForViewport();
   
+    /* ---------- authorization ----------
+     * Three independent signals, any one of which grants admin access:
+     *   1. the `admin` custom claim on the ID token (set by the Admin SDK),
+     *   2. the `admins/{uid}` record in the database,
+     *   3. the VITE_ADMIN_EMAILS allowlist (bootstrap path).
+     * Signals 1 and 2 are the real gate; 3 only bootstraps the first admin.
+     */
+    async function checkIsAdmin(user) {
+      // 1. custom claim
+      try {
+        const token = await user.getIdTokenResult();
+        if (token && token.claims && token.claims.admin === true) return true;
+      } catch (err) { /* fall through to the other checks */ }
+
+      // 2. database record
+      try {
+        const snap = await get(ref(db, `admins/${user.uid}`));
+        if (snap.exists() && snap.val() && snap.val().enabled !== false) return true;
+      } catch (err) { /* fall through to the allowlist */ }
+
+      // 3. allowlist
+      return isAdminEmail(user.email);
+    }
+
     /* ---------- data listeners ---------- */
     function wireDataListeners() {
       onValue(ref(db, "users"), (snap) => { allUsers = snap.val() || {}; renderUsers(); renderOverview(); renderAllTxTables(); });

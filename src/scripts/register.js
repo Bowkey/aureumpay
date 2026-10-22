@@ -281,6 +281,7 @@ export function mountPage() {
           firstName: $('firstName').value.trim(),
           lastName: $('lastName').value.trim(),
           email,
+          role: 'customer',
           phone: $('phone').value.trim(),
           dob: $('dob').value,
           countryResidence: $('countryResidence').value,

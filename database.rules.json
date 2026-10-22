@@ -1,0 +1,60 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+        ".validate": "!newData.exists() || newData.child('role').val() === null",
+        "balance": {
+          ".write": "auth != null && auth.token.admin === true"
+        },
+        "active": {
+          ".write": "auth != null && auth.token.admin === true"
+        },
+        "suspended": {
+          ".write": "auth != null && auth.token.admin === true"
+        },
+        "withdrawalPins": {
+          ".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)"
+        }
+      }
+    },
+
+    "admins": {
+      ".read": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+      "$uid": {
+        ".write": "auth != null && auth.token.admin === true",
+        ".validate": "auth != null && auth.token.admin === true"
+      }
+    },
+
+    "accountNumbers": {
+      ".read": "auth != null",
+      "$number": {
+        ".write": "auth != null && (!data.exists() ? newData.val() === auth.uid : data.val() === auth.uid || auth.token.admin === true)",
+        ".validate": "newData.isString() && newData.val().length <= 128"
+      }
+    },
+
+    "transactions": {
+      "$txId": {
+        ".read": "auth != null && (auth.token.admin === true || data.child('uid').val() === auth.uid)",
+        ".write": "auth != null && (auth.token.admin === true || (!data.exists() && newData.child('uid').val() === auth.uid))",
+        ".validate": "auth != null && newData.child('uid').val() === auth.uid",
+        "status": {
+          ".write": "auth != null && auth.token.admin === true"
+        }
+      }
+    },
+
+    "settings": {
+      ".read": "auth != null",
+      "deposit": {
+        ".write": "auth != null && auth.token.admin === true"
+      }
+    }
+  }
+}
