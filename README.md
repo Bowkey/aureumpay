@@ -21,4 +21,6 @@ Create a production build with `npm run build` and preview it with `npm run prev
 - `src/main.jsx` — application router and entry point.
 
 Both the original `.html` routes and the shorter React paths are supported.
-For production hosting, configure the host to serve `index.html` for client-side routes.
+`vercel.json` configures Vercel to serve `index.html` for client-side routes such
+as `/login`, `/register`, `/dashboard`, and `/admin`, including on browser refresh.
+For other production hosts, configure an equivalent SPA fallback.
