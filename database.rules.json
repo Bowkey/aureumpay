@@ -68,6 +68,10 @@
 
     "settings": {
       ".read": "auth != null",
+      "contact": {
+        ".read": true,
+        ".write": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)"
+      },
       "deposit": {
         ".write": "auth != null && auth.token.admin === true"
       }

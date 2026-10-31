@@ -13,6 +13,7 @@ export function mountPage() {
     let allTx = [];           // flat array of {id, ...tx}
     let activeUid = null;
     let depositSettings = {}; // settings/deposit from Firebase (bank + crypto coins)
+    let contactSettings = {};
     let adminUids = {};        // uid -> admin record (from `admins`)
     let currentAdminUid = null; // uid of the signed-in administrator
   
@@ -123,7 +124,7 @@ export function mountPage() {
     function goToSection(name) {
       sectionIds.forEach((s) => $(`sec-${s}`).classList.toggle("hidden", s !== name));
       document.querySelectorAll(".nav-item[data-section]").forEach((el) => el.classList.toggle("active", el.dataset.section === name));
-      const titles = { overview: "Overview", users: "Users", deposits: "Deposits", transfers: "Transfers", withdrawals: "Withdrawals", cards: "Cards", loans: "Loans", depositsettings: "Deposit Settings" };
+      const titles = { overview: "Overview", users: "Users", deposits: "Deposits", transfers: "Transfers", withdrawals: "Withdrawals", cards: "Cards", loans: "Loans", depositsettings: "Site Settings" };
       $("mobileTitle").textContent = titles[name] || "Overview";
       closeDrawer();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -190,6 +191,14 @@ export function mountPage() {
       }, (err) => {
         console.error("Could not load deposit settings:", err);
         showToast("Could not load deposit settings. Check the deployed Realtime Database rules.", "rose");
+      });
+      onValue(ref(db, "settings/contact"), (snap) => {
+        contactSettings = snap.val() || {};
+        if (document.activeElement !== $("contactEmail")) $("contactEmail").value = contactSettings.email || "";
+        if (document.activeElement !== $("contactTelegram")) $("contactTelegram").value = contactSettings.telegram || "";
+      }, (err) => {
+        console.error("Could not load contact settings:", err);
+        showToast("Could not load contact settings. Check the deployed Realtime Database rules.", "rose");
       });
       onValue(ref(db, "admins"), (snap) => {
         adminUids = snap.val() || {};
@@ -647,6 +656,27 @@ export function mountPage() {
         showToast("Bank settings saved", "mint");
       } catch (err) {
         showToast("Something went wrong — try again.", "rose");
+      }
+    });
+
+    $("contactSaveBtn").addEventListener("click", async () => {
+      const email = $("contactEmail").value.trim();
+      const telegram = $("contactTelegram").value.trim().replace(/^@/, "");
+      if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+        showToast("Enter a valid support email address.", "rose");
+        return;
+      }
+      if (telegram && !/^[A-Za-z0-9_]{5,32}$/.test(telegram)) {
+        showToast("Enter a valid Telegram username (5–32 letters, numbers, or underscores).", "rose");
+        return;
+      }
+
+      try {
+        await update(ref(db, "settings/contact"), { email, telegram });
+        showToast("Contact details saved", "mint");
+      } catch (err) {
+        console.error("Could not save contact settings:", err);
+        showToast("Could not save contact details. Check your admin access and database rules.", "rose");
       }
     });
   

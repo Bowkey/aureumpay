@@ -398,8 +398,8 @@ export default function AboutPage() {
       <div>
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--mint)]/60 mb-5">Support</p>
         <ul className="space-y-3 text-sm text-[var(--mint)]">
-          <li><a href="#" className="underline-hover">Help center</a></li>
-          <li><a href="#" className="underline-hover">Contact us</a></li>
+          <li><a id="aboutContactEmail" href="#" className="underline-hover hidden">Email support</a></li>
+          <li><a id="aboutContactTelegram" href="#" target="_blank" rel="noreferrer" className="underline-hover hidden">Telegram support</a></li>
           <li><a href="#" className="underline-hover">Status</a></li>
           <li><a href="#" className="underline-hover">Accessibility</a></li>
         </ul>

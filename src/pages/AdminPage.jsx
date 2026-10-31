@@ -56,7 +56,7 @@ export default function AdminPage() {
       <div className="nav-item" data-section="withdrawals"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg> Withdrawals <span id="badgeWithdrawals" className="ml-auto hidden pill pill-pending"></span></div>
       <div className="nav-item" data-section="cards"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19"/></svg> Cards <span id="badgeCards" className="ml-auto hidden pill pill-pending"></span></div>
       <div className="nav-item" data-section="loans"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Loans <span id="badgeLoans" className="ml-auto hidden pill pill-pending"></span></div>
-      <div className="nav-item" data-section="depositsettings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19M7 15h4"/></svg> Deposit Settings</div>
+      <div className="nav-item" data-section="depositsettings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19M7 15h4"/></svg> Site Settings</div>
     </nav>
     <button id="logoutBtn" className="nav-item mt-2" style={{color: 'var(--error)'}}>
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> Log out
@@ -149,8 +149,18 @@ export default function AdminPage() {
 
       {/* ===== Deposit Settings ===== */}
       <section id="sec-depositsettings" className="hidden">
-        <h1 className="text-[24px] font-serif font-medium mb-1">Deposit Settings</h1>
-        <p className="text-muted2 text-[14px] mb-6">Control what every user sees on their Deposit page — this updates live on their dashboard.</p>
+        <h1 className="text-[24px] font-serif font-medium mb-1">Site Settings</h1>
+        <p className="text-muted2 text-[14px] mb-6">Manage support contacts shown on the website and user dashboards, plus deposit details.</p>
+
+        <div className="surface p-5 mb-8">
+          <p className="font-serif text-[16px] mb-1">Support contact</p>
+          <p className="help-sm mb-4">These details appear in the website footer and on users' dashboards. Leave a field blank to hide that contact option.</p>
+          <div className="grid sm:grid-cols-2 gap-4 mb-5">
+            <div><label className="label-sm" htmlFor="contactEmail">Support email</label><input id="contactEmail" type="email" className="input-field" placeholder="support@example.com" /></div>
+            <div><label className="label-sm" htmlFor="contactTelegram">Telegram username</label><input id="contactTelegram" className="input-field" placeholder="@your_support_username" /><p className="help-sm mt-1">Enter the username, with or without @.</p></div>
+          </div>
+          <button id="contactSaveBtn" className="btn-primary font-medium text-[13.5px] py-2.5 px-5">Save contact details</button>
+        </div>
 
         <div className="surface p-5 mb-8">
           <p className="font-serif text-[16px] mb-1">Bank transfer details</p>

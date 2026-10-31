@@ -1,6 +1,12 @@
 
 
+import { bindContactDetails } from "../utils/contact.js";
+
 export function mountPage() {
+  const unbindContact = bindContactDetails({
+    emailLinkId: "aboutContactEmail",
+    telegramLinkId: "aboutContactTelegram",
+  });
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
     const preloader = document.getElementById('preloader');
@@ -100,4 +106,5 @@ export function mountPage() {
         }
       });
     }
+  return unbindContact;
 }

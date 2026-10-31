@@ -91,6 +91,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        <div id="supportContactCard" className="hidden surface p-5 mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--leaf)] mb-2">Support</p>
+          <h2 className="font-serif text-[18px] mb-3">Need help? Contact us.</h2>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13.5px]">
+            <a id="dashboardContactEmail" href="#" className="underline text-[var(--leaf)] hidden">Email support</a>
+            <a id="dashboardContactTelegram" href="#" target="_blank" rel="noreferrer" className="underline text-[var(--leaf)] hidden">Telegram support</a>
+          </div>
+        </div>
+
         <div className="hero-card p-6 sm:p-8 mb-6">
           <div id="acctStatusPill" className="status-pill relative z-10 mb-4" style={{background: 'rgba(255,255,255,.14)'}}>
             <span id="acctStatusDot" className="w-1.5 h-1.5 rounded-full" style={{background: '#4B8EF5'}}></span>

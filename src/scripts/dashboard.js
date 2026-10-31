@@ -1,4 +1,5 @@
 import { app, isFirebaseConfigured } from "../firebase.js";
+import { bindContactDetails } from "../utils/contact.js";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getDatabase, ref, onValue, update, push, set, query, orderByChild, equalTo } from "firebase/database";
 
@@ -10,6 +11,11 @@ export function mountPage(navigate) {
 
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const unbindContact = bindContactDetails({
+      emailLinkId: "dashboardContactEmail",
+      telegramLinkId: "dashboardContactTelegram",
+      containerId: "supportContactCard",
+    });
   
     const $ = (id) => document.getElementById(id);
     let currentUid = null;
@@ -1027,4 +1033,5 @@ export function mountPage(navigate) {
       await signOut(auth);
       navigate("/login");
     });
+    return unbindContact;
 }

@@ -1,6 +1,11 @@
-
+import { bindContactDetails } from "../utils/contact.js";
 
 export function mountPage() {
+  const unbindContact = bindContactDetails({
+    emailLinkId: "siteContactEmail",
+    telegramLinkId: "siteContactTelegram",
+  });
+
   // Blocking, runs before first paint so there's no flash of the wrong theme.
     (function(){
       try{
@@ -153,4 +158,5 @@ export function mountPage() {
         }
       });
     }
+  return unbindContact;
 }
