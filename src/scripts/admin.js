@@ -534,7 +534,10 @@ export function mountPage() {
         $("umAdjustAmount").value = "";
         $("umAdjustNote").value = "";
       } catch (err) {
-        showToast("Something went wrong — try again.", "rose");
+        console.error("Could not adjust user balance:", err);
+        showToast(err && err.code === "PERMISSION_DENIED"
+          ? "Balance adjustment denied. Verify that admin database rules are deployed."
+          : "Could not adjust balance. Check the console for details and try again.", "rose");
       }
     });
   
