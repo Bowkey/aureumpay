@@ -106,13 +106,13 @@ export default function HomePage() {
       </p>
 
       <div className="fade-up mt-10 flex flex-wrap items-center gap-5" style={{animationDelay: '.45s'}}>
-        <a href="#" className="sweep px-8 py-4 text-white text-sm font-medium tracking-wide" style={{background: 'var(--forest)'}}>
+        <Link to="register" className="sweep px-8 py-4 text-white text-sm font-medium tracking-wide" style={{background: 'var(--forest)'}}>
           Open your account
-        </a>
-        <a href="#" className="group inline-flex items-center gap-3 text-sm font-medium tracking-wide">
+        </Link>
+        {/* <a href="#" className="group inline-flex items-center gap-3 text-sm font-medium tracking-wide">
           <span className="w-11 h-11 rounded-full border border-[var(--ink)]/25 flex items-center justify-center group-hover:border-[var(--ink)] transition-colors">▸</span>
           Watch the film
-        </a>
+        </a> */}
       </div>
 
       <div className="fade-up mt-14 sm:mt-16 grid grid-cols-3 gap-6 sm:flex sm:items-center sm:gap-10 max-w-lg" style={{animationDelay: '.6s'}}>

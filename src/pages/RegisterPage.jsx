@@ -136,12 +136,12 @@ export default function RegisterPage() {
       <div className="grid sm:grid-cols-2 gap-5 mt-5">
         <div>
           <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--forest)]/50 block mb-2">City</label>
-          <input id="city" type="text" placeholder="Lagos" className="field-input"/>
+          <input id="city" type="text" placeholder="Pheonix" className="field-input"/>
           <p id="cityMsg" className="field-msg text-xs mt-1.5 hidden"></p>
         </div>
         <div>
           <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--forest)]/50 block mb-2">State / Province</label>
-          <input id="state" type="text" placeholder="Lagos State" className="field-input"/>
+          <input id="state" type="text" placeholder="Arizona State" className="field-input"/>
           <p id="stateMsg" className="field-msg text-xs mt-1.5 hidden"></p>
         </div>
       </div>

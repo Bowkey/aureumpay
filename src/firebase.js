@@ -6,7 +6,7 @@ export const firebaseConfig = {
 
   apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyCrBn-SGY7W0m1z0O7wtCq2OAl_eNSkSmA",
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "aureumpay-28c7a.firebaseapp.com",
-  databaseURL: env.VITE_FIREBASE_DATABASE_URL,
+  databaseURL: env.VITE_FIREBASE_DATABASE_URL || "https://aureumpay-28c7a-default-rtdb.firebaseio.com",
   projectId: env.VITE_FIREBASE_PROJECT_ID || "aureumpay-28c7a",
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "aureumpay-28c7a.firebasestorage.app",
   messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "698444813351",
