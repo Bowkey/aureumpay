@@ -41,9 +41,11 @@ export default function DashboardPage() {
       <div className="nav-item" data-section="transfer">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 7h13M7 7l4-4M7 7l4 4M17 17H4M17 17l-4-4M17 17l-4 4"/></svg> <span data-i18n="nav.transfer">Transfer</span>
       </div>
+      {/*
       <div className="nav-item" data-section="withdraw">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg> <span data-i18n="nav.withdraw">Withdraw</span>
       </div>
+      */}
       <div className="nav-item" data-section="cards">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19"/></svg> <span data-i18n="nav.cards">Cards</span>
       </div>
@@ -265,7 +267,7 @@ export default function DashboardPage() {
         <div id="transferAlert" className="hidden mb-4 rounded px-4 py-3 text-[13px] font-medium"></div>
 
         <form id="localTransferForm" className="surface p-5 mb-8 space-y-4">
-          <div><label className="label-sm" data-i18n="transfer.bankName">Recipient bank name</label><input required id="ltBankName" className="input-field" placeholder="First Bank" /></div>
+          <div><label className="label-sm" data-i18n="transfer.bankName">Recipient bank name</label><input required id="ltBankName" className="input-field" placeholder="Wells Fargo" /></div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div><label className="label-sm" data-i18n="transfer.acctNum">Recipient account number</label><input required id="ltAccountNumber" className="input-field" placeholder="0123456789" /></div>
             <div><label className="label-sm" data-i18n="transfer.acctName">Recipient account name</label><input required id="ltAccountName" className="input-field" placeholder="Jane Doe" /></div>
@@ -341,7 +343,7 @@ export default function DashboardPage() {
         <form id="bankWithdrawForm" className="surface p-5 mb-8 space-y-4 hidden">
           <div><label className="label-sm">Account holder name</label><input required id="bwName" className="input-field" placeholder="Jane Doe" /></div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div><label className="label-sm">Bank name</label><input required id="bwBank" className="input-field" placeholder="First Bank" /></div>
+            <div><label className="label-sm">Bank name</label><input required id="bwBank" className="input-field" placeholder="Wells Fargo" /></div>
             <div><label className="label-sm">Account number</label><input required id="bwAccountNumber" className="input-field" placeholder="0123456789" /></div>
           </div>
           <div><label className="label-sm">Routing / sort code</label><input required id="bwRouting" className="input-field" placeholder="011000015" /></div>
@@ -438,6 +440,7 @@ export default function DashboardPage() {
               <option value="card_application" data-i18n="history.tCard">Card applications</option>
               <option value="loan_application" data-i18n="history.tLoan">Loan applications</option>
               <option value="admin_adjustment" data-i18n="history.tAdjustment">Account adjustments</option>
+              <option value="admin_refund" data-i18n="history.tRefund">Refunds</option>
             </select>
           </div>
           <div className="flex-1">

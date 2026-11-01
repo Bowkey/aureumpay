@@ -359,7 +359,7 @@ export function mountPage(navigate) {
         "loans.apply":"Apply for loan","loans.history":"Loan history","loans.p1":"Business","loans.p2":"Education","loans.p3":"Medical","loans.p4":"Personal",
         "history.title":"Transaction History","history.sub":"Every transaction on your account, from first to most recent.","history.filterType":"Type","history.filterStatus":"Status",
         "history.allTypes":"All types","history.tDeposit":"Deposits","history.tTransfer":"Transfers","history.tWithdrawal":"Withdrawals","history.tCard":"Card applications",
-        "history.tLoan":"Loan applications","history.tAdjustment":"Account adjustments","history.allStatuses":"All statuses","history.stPending":"Pending","history.stApproved":"Approved","history.stRejected":"Rejected",
+        "history.tLoan":"Loan applications","history.tAdjustment":"Account adjustments","history.tRefund":"Refunds","history.allStatuses":"All statuses","history.stPending":"Pending","history.stApproved":"Approved","history.stRejected":"Rejected",
         "settings.sub":"Personalize how your dashboard looks and reads.","settings.theme":"Appearance","settings.light":"Light","settings.dark":"Dark","settings.font":"Font",
         "settings.language":"Language","settings.pin":"Transaction PIN","profile.sub":"Your personal and account details.","common.select":"Select","common.cancel":"Cancel",
         "common.edit":"Edit","common.save":"Save changes" },
@@ -376,7 +376,7 @@ export function mountPage(navigate) {
         "loans.apply":"Demander un prêt","loans.history":"Historique des prêts","loans.p1":"Affaires","loans.p2":"Éducation","loans.p3":"Médical","loans.p4":"Personnel",
         "history.title":"Historique des transactions","history.sub":"Chaque transaction de votre compte, de la première à la plus récente.","history.filterType":"Type","history.filterStatus":"Statut",
         "history.allTypes":"Tous les types","history.tDeposit":"Dépôts","history.tTransfer":"Transferts","history.tWithdrawal":"Retraits","history.tCard":"Demandes de carte",
-        "history.tLoan":"Demandes de prêt","history.tAdjustment":"Ajustements de compte","history.allStatuses":"Tous les statuts","history.stPending":"En attente","history.stApproved":"Approuvé","history.stRejected":"Rejeté",
+        "history.tLoan":"Demandes de prêt","history.tAdjustment":"Ajustements de compte","history.tRefund":"Remboursements","history.allStatuses":"Tous les statuts","history.stPending":"En attente","history.stApproved":"Approuvé","history.stRejected":"Rejeté",
         "settings.sub":"Personnalisez l'apparence de votre tableau de bord.","settings.theme":"Apparence","settings.light":"Clair","settings.dark":"Sombre","settings.font":"Police",
         "settings.language":"Langue","settings.pin":"Code PIN de transaction","profile.sub":"Vos informations personnelles et de compte.","common.select":"Sélectionner","common.cancel":"Annuler",
         "common.edit":"Modifier","common.save":"Enregistrer" },
@@ -714,6 +714,9 @@ export function mountPage(navigate) {
     // Friendly, user-facing description for a transaction row.
     // Admin balance adjustments should read as a plain credit/debit, never "Admin credit/debit".
     function displayDescription(tx) {
+      if (tx.type === "admin_refund") {
+        return tx.description || "Refund issued";
+      }
       if (tx.type === "admin_adjustment") {
         return tx.direction === "credit" ? "Account credited" : "Account debited";
       }
@@ -746,6 +749,7 @@ export function mountPage(navigate) {
       if (filter === "card_application") return tx.type === "card_application";
       if (filter === "loan_application") return tx.type === "loan_application";
       if (filter === "admin_adjustment") return tx.type === "admin_adjustment";
+      if (filter === "admin_refund") return tx.type === "admin_refund";
       return true;
     }
     function renderHistoryList() {
@@ -1022,6 +1026,9 @@ export function mountPage(navigate) {
         const val = snap.val() || {};
         allTx = Object.entries(val).map(([id, tx]) => ({ id, ...tx })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         refreshAllLists();
+      }, (error) => {
+        console.error("Could not load transaction history:", error);
+        showToast("Could not load transaction history. Check your database rules.", "rose");
       });
     });
   

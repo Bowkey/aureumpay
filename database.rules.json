@@ -49,7 +49,8 @@
     },
 
     "transactions": {
-      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)",
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || (query.orderByChild === 'uid' && query.equalTo === auth.uid))",
+      ".indexOn": ["uid"],
 
       "$txId": {
         ".read": "auth != null && (auth.token.admin === true || (query.orderByChild === 'uid' && query.equalTo === auth.uid) || data.child('uid').val() === auth.uid)",

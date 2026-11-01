@@ -510,7 +510,7 @@ export default function HomePage() {
       <div className="flex items-center gap-4 lg:border-l lg:border-[var(--line)] lg:pl-10">
         <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-mono text-sm" style={{background: 'var(--forest)', color: 'var(--onDark)'}}>MO</div>
         <div>
-          <p className="font-medium">Maya Okonkwo</p>
+          <p className="font-medium">Maya Hemmingway</p>
           <p className="text-sm text-[var(--ink)]/55">Founder, Studio Fern</p>
           <div className="flex gap-0.5 mt-2" aria-hidden="true">
             <svg width="12" height="12" viewBox="0 0 20 20" fill="var(--leaf-bright)"><path d="M10 1.5l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8L10 1.5Z"/></svg>

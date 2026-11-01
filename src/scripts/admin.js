@@ -120,16 +120,24 @@ export function mountPage() {
     }
   
     /* ---------- nav ---------- */
-    const sectionIds = ["overview", "users", "deposits", "transfers", "withdrawals", "cards", "loans", "depositsettings"];
+    const sections = Array.from(document.querySelectorAll("main section[id^='sec-']"));
     function goToSection(name) {
-      sectionIds.forEach((s) => $(`sec-${s}`).classList.toggle("hidden", s !== name));
+      const selectedSection = $(`sec-${name}`);
+      if (!selectedSection) return;
+      sections.forEach((section) => section.classList.toggle("hidden", section !== selectedSection));
       document.querySelectorAll(".nav-item[data-section]").forEach((el) => el.classList.toggle("active", el.dataset.section === name));
       const titles = { overview: "Overview", users: "Users", deposits: "Deposits", transfers: "Transfers", withdrawals: "Withdrawals", cards: "Cards", loans: "Loans", depositsettings: "Site Settings" };
       $("mobileTitle").textContent = titles[name] || "Overview";
       closeDrawer();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    document.querySelectorAll(".nav-item[data-section]").forEach((el) => el.addEventListener("click", () => goToSection(el.dataset.section)));
+    document.querySelectorAll(".nav-item[data-section]").forEach((el) => {
+      if (!$(`sec-${el.dataset.section}`)) {
+        el.classList.add("hidden");
+        return;
+      }
+      el.addEventListener("click", () => goToSection(el.dataset.section));
+    });
     function openDrawer() { $("sidebar").classList.remove("-translate-x-full"); $("drawerBackdrop").classList.remove("hidden"); }
     function closeDrawer() { $("sidebar").classList.add("-translate-x-full"); $("drawerBackdrop").classList.add("hidden"); }
     $("openDrawerBtn").addEventListener("click", openDrawer);
@@ -253,10 +261,11 @@ export function mountPage() {
     }
     function setBadge(id, count) {
       const el = $(id);
+      if (!el) return;
       if (count > 0) { el.textContent = count; el.classList.remove("hidden"); } else { el.classList.add("hidden"); }
     }
     function prettyType(type) {
-      const map = { deposit_bank: "Bank deposit", deposit_crypto: "Crypto deposit", transfer_local: "Local transfer", transfer_international: "Int'l transfer", withdrawal: "Withdrawal", card_application: "Card application", loan_application: "Loan application", admin_adjustment: "Admin adjustment" };
+      const map = { deposit_bank: "Bank deposit", deposit_crypto: "Crypto deposit", transfer_local: "Local transfer", transfer_international: "Int'l transfer", withdrawal: "Withdrawal", card_application: "Card application", loan_application: "Loan application", admin_adjustment: "Admin adjustment", admin_refund: "Refund" };
       return map[type] || type;
     }
   
@@ -320,11 +329,15 @@ export function mountPage() {
         return `<tr><td><p class="font-medium">${u.name}</p><p class="help-sm">${u.email}</p></td><td>${prettyType(tx.type)}</td><td class="font-mono">${fmtMoney(tx.amount, tx.currency)}</td><td>${txDetailsSummary(tx)}</td><td>${new Date(tx.createdAt).toLocaleDateString()}</td><td>${statusPill(tx.status)}</td><td>${actionOrStatus(tx)}</td></tr>`;
       }).join("");
   
-      $("withdrawalsEmpty").classList.toggle("hidden", withdrawals.length > 0);
-      $("withdrawalsTableBody").innerHTML = withdrawals.map((tx) => {
-        const u = userLabel(tx.uid);
-        return `<tr><td><p class="font-medium">${u.name}</p><p class="help-sm">${u.email}</p></td><td>${(tx.details && tx.details.method) || "—"}</td><td class="font-mono">${fmtMoney(tx.amount, tx.currency)}</td><td>${txDetailsSummary(tx)}</td><td>${new Date(tx.createdAt).toLocaleDateString()}</td><td>${statusPill(tx.status)}</td><td>${actionOrStatus(tx)}</td></tr>`;
-      }).join("");
+      const withdrawalsEmpty = $("withdrawalsEmpty");
+      const withdrawalsTableBody = $("withdrawalsTableBody");
+      if (withdrawalsEmpty && withdrawalsTableBody) {
+        withdrawalsEmpty.classList.toggle("hidden", withdrawals.length > 0);
+        withdrawalsTableBody.innerHTML = withdrawals.map((tx) => {
+          const u = userLabel(tx.uid);
+          return `<tr><td><p class="font-medium">${u.name}</p><p class="help-sm">${u.email}</p></td><td>${(tx.details && tx.details.method) || "—"}</td><td class="font-mono">${fmtMoney(tx.amount, tx.currency)}</td><td>${txDetailsSummary(tx)}</td><td>${new Date(tx.createdAt).toLocaleDateString()}</td><td>${statusPill(tx.status)}</td><td>${actionOrStatus(tx)}</td></tr>`;
+        }).join("");
+      }
   
       $("cardsEmpty").classList.toggle("hidden", cards.length > 0);
       $("cardsTableBody").innerHTML = cards.map((tx) => {
@@ -467,6 +480,7 @@ export function mountPage() {
     $("umCloseBtn").addEventListener("click", () => { $("userModal").classList.add("hidden"); activeUid = null; });
   
     function displayDescription(tx) {
+      if (tx.type === "admin_refund") return tx.description || "Refund issued";
       if (tx.type === "admin_adjustment") return tx.direction === "credit" ? "Account credited" : "Account debited";
       return tx.description || prettyType(tx.type);
     }
@@ -515,22 +529,26 @@ export function mountPage() {
     $("umAdjustBtn").addEventListener("click", async () => {
       if (!activeUid) return;
       const amount = Number($("umAdjustAmount").value);
-      const direction = $("umAdjustDirection").value;
+      const action = $("umAdjustDirection").value;
+      const direction = action === "debit" ? "debit" : "credit";
       if (!amount || amount <= 0) { showToast("Enter a valid amount.", "rose"); return; }
       const user = allUsers[activeUid];
       const currentBalance = Number(user.balance || 0);
       const newBalance = direction === "credit" ? currentBalance + amount : currentBalance - amount;
+      const isRefund = action === "refund";
+      const note = $("umAdjustNote").value.trim();
+      const timestamp = new Date().toISOString();
   
       const updates = {};
       updates[`users/${activeUid}/balance`] = newBalance;
       updates[`transactions/admin_${Date.now()}`] = {
-        uid: activeUid, type: "admin_adjustment", direction, amount, currency: user.currency,
-        description: $("umAdjustNote").value.trim() || (direction === "credit" ? "Admin credit" : "Admin debit"),
-        status: "approved", createdAt: new Date().toISOString(), reviewedAt: new Date().toISOString(),
+        uid: activeUid, type: isRefund ? "admin_refund" : "admin_adjustment", direction, amount, currency: user.currency,
+        description: note || (isRefund ? "Refund issued" : direction === "credit" ? "Admin credit" : "Admin debit"),
+        status: "approved", createdAt: timestamp, reviewedAt: timestamp,
       };
       try {
         await update(ref(db), updates);
-        showToast("Balance updated", "mint");
+        showToast(isRefund ? "Refund issued" : "Balance updated", "mint");
         $("umAdjustAmount").value = "";
         $("umAdjustNote").value = "";
       } catch (err) {
