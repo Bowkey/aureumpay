@@ -361,7 +361,7 @@ export default function DashboardPage() {
       {/* ===== Cards ===== */}
       <section id="sec-cards" className="hidden">
         <h1 className="text-[24px] font-serif font-medium mb-1" data-i18n="nav.cards">Cards</h1>
-        <p className="text-muted2 text-[14px] mb-5" data-i18n="cards.sub">Apply for a virtual or physical card.</p>
+        <p className="text-muted2 text-[14px] mb-5" data-i18n="cards.sub">Apply for a physical card. Prices and fees are fixed in USD; your account must use USD.</p>
 
         <div id="cardsAlert" className="hidden mb-4 rounded px-4 py-3 text-[13px] font-medium"></div>
 
@@ -489,9 +489,12 @@ export default function DashboardPage() {
           <select id="languageSelect" className="input-field">
             <option value="en">English</option>
             <option value="fr">Français</option>
-            <option value="yo">Yorùbá</option>
-            <option value="ha">Hausa</option>
-            <option value="ig">Igbo</option>
+            <option value="ja">日本語</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="pt">Português</option>
+            <option value="it">Italiano</option>
+            <option value="ar">العربية</option>
           </select>
         </div>
 
@@ -502,8 +505,8 @@ export default function DashboardPage() {
         </div>
 
         <div className="surface p-5">
-          <p className="font-serif text-[15.5px] mb-1">Withdrawal</p>
-          <p className="help-sm">Four PINs, entered one after another, are required to complete a withdrawal. These were generated automatically when your account was created and are managed by Aureumpay support — contact them if you don't have yours or need a reminder.</p>
+          <p className="font-serif text-[15.5px] mb-1">Safety Tip</p>
+          <p className="help-sm">Make sure you do not share your PIN with anyone. Aureumpay will never ask for your PIN via email or phone.</p>
         </div>
       </section>
 

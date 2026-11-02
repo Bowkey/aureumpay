@@ -33,6 +33,11 @@ export function mountPage(navigate) {
       setTimeout(() => { el.style.transition = "opacity .3s ease, transform .3s ease"; el.style.opacity = "0"; el.style.transform = "translateY(8px)"; setTimeout(() => el.remove(), 300); }, 3400);
     }
     function setAlert(el, message, tone = "rose") {
+      if (!el) {
+        console.error("Could not display dashboard alert: its target element is missing.");
+        if (message) showToast(message, tone);
+        return;
+      }
       if (!message) { el.classList.add("hidden"); el.textContent = ""; return; }
       const tones = { rose: "bg-[rgba(179,67,43,.08)] text-[var(--error)]", mint: "bg-[rgba(37,99,200,.1)] text-[var(--leaf)]" };
       el.className = `mb-4 rounded px-4 py-3 text-[13px] font-medium ${tones[tone] || tones.rose}`;
@@ -272,10 +277,9 @@ export function mountPage(navigate) {
   
     /* ---------- card types (colored) ---------- */
     const CARD_TYPES = [
-      { id: "virtual", name: "Virtual Card", fee: 0, desc: "Instant virtual card for online payments.", grad: "from-leaf via-[#4B8EF5] to-forest" },
-      { id: "standard", name: "Standard Physical Debit", fee: 1500, desc: "Classic debit card, delivered in 5–7 business days.", grad: "from-forest to-forestdeep" },
-      { id: "gold", name: "Gold Physical Debit", fee: 5000, desc: "Higher limits and premium perks.", grad: "from-[#C9962C] via-[#E9C46A] to-[#9C6B1F]" },
-      { id: "platinum", name: "Platinum Metal Card", fee: 15000, desc: "Metal card, highest limits, concierge support.", grad: "from-[#6E7681] via-[#B7BEC7] to-[#4A5058]" },
+      { id: "standard", name: "Standard Physical Debit", fee: 200, desc: "Classic debit card, delivered in 5–7 business days.", grad: "from-forest to-forestdeep" },
+      { id: "gold", name: "Gold Physical Debit", fee: 500, desc: "Higher limits and premium perks.", grad: "from-[#C9962C] via-[#E9C46A] to-[#9C6B1F]" },
+      { id: "platinum", name: "Platinum Metal Card", fee: 1000, desc: "Metal card, highest limits, concierge support.", grad: "from-[#6E7681] via-[#B7BEC7] to-[#4A5058]" },
     ];
   
     function cardVisual(grad, name, holder, numberDisplay) {
@@ -303,15 +307,15 @@ export function mountPage(navigate) {
     function renderCardTypeGrid() {
       const grid = $("cardTypeGrid");
       grid.innerHTML = CARD_TYPES.map((c) => `
-        <div class="surface p-4 flex flex-col gap-3">
-          ${cardVisual(c.grad, c.name, userData.fullName, "•••• •••• •••• ••••")}
-          <p class="help-sm">${c.desc}</p>
-          <div class="flex items-center justify-between">
-            <span class="font-medium text-[14px]">${c.fee === 0 ? "Free" : fmtMoney(c.fee, userData.currency) + " fee"}</span>
-            <button class="btn-primary font-medium text-[13px] py-2 px-4" data-apply-card="${c.id}">Apply</button>
+          <div class="surface p-4 flex flex-col gap-3">
+            ${cardVisual(c.grad, c.name, userData.fullName, "•••• •••• •••• ••••")}
+            <p class="help-sm">${c.desc}</p>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-[14px]">${fmtMoney(c.fee, "USD")} fee</span>
+              <button class="btn-primary font-medium text-[13px] py-2 px-4" data-apply-card="${c.id}">Apply</button>
+            </div>
           </div>
-        </div>
-      `).join("");
+        `).join("");
       grid.querySelectorAll("[data-apply-card]").forEach((btn) => {
         btn.addEventListener("click", () => openCardApplyForm(btn.dataset.applyCard));
       });
@@ -329,8 +333,15 @@ export function mountPage(navigate) {
   
     function openCardApplyForm(typeId) {
       const type = CARD_TYPES.find((c) => c.id === typeId);
+      if (!type) return;
+      if (userData.currency !== "USD") {
+        setAlert($("cardsAlert"), "Card fees are charged in USD. Set your account currency to USD before applying; no currency conversion is applied.", "rose");
+        return;
+      }
       $("cardApplyForm").dataset.typeId = typeId;
-      $("cardApplyTypeName").textContent = `${type.name} (${type.fee === 0 ? "Free" : fmtMoney(type.fee, userData.currency)})`;
+      $("cardApplyForm").dataset.fee = String(type.fee);
+      $("cardApplyForm").dataset.currency = "USD";
+      $("cardApplyTypeName").textContent = `${type.name} (${fmtMoney(type.fee, "USD")})`;
       $("cardholderName").value = userData.fullName || "";
       $("cardBillingAddress").value = [userData.address, userData.city, userData.state, userData.country].filter(Boolean).join(", ");
       $("cardApplyForm").classList.remove("hidden");
@@ -354,7 +365,7 @@ export function mountPage(navigate) {
         "transfer.iban":"IBAN / account number","transfer.destCurrency":"Destination currency","transfer.purpose":"Purpose of transfer","transfer.sendIntl":"Send international transfer",
         "transfer.history":"Transfer history","transfer.p1":"Family support","transfer.p2":"Business payment","transfer.p3":"Education","transfer.p4":"Other",
         "withdraw.sub":"Cash out to PayPal, Cash App, or your bank.","withdraw.bank":"Bank account","withdraw.request":"Request withdrawal","withdraw.history":"Withdrawal history",
-        "cards.sub":"Apply for a virtual or physical card.","cards.apply":"Apply for card","cards.submitApp":"Submit application","cards.yours":"Your cards & applications","cards.empty":"No cards yet.",
+        "cards.sub":"Apply for a physical card. Prices and fees are fixed in USD.","cards.apply":"Apply for card","cards.submitApp":"Submit application","cards.yours":"Your cards & applications","cards.empty":"No cards yet.",
         "loans.sub":"Apply for a loan — funds arrive once approved.","loans.amount":"Loan amount","loans.purpose":"Purpose","loans.duration":"Duration","loans.income":"Monthly income (optional)",
         "loans.apply":"Apply for loan","loans.history":"Loan history","loans.p1":"Business","loans.p2":"Education","loans.p3":"Medical","loans.p4":"Personal",
         "history.title":"Transaction History","history.sub":"Every transaction on your account, from first to most recent.","history.filterType":"Type","history.filterStatus":"Status",
@@ -371,7 +382,7 @@ export function mountPage(navigate) {
         "transfer.iban":"IBAN / numéro de compte","transfer.destCurrency":"Devise de destination","transfer.purpose":"Motif du transfert","transfer.sendIntl":"Envoyer le transfert international",
         "transfer.history":"Historique des transferts","transfer.p1":"Soutien familial","transfer.p2":"Paiement professionnel","transfer.p3":"Éducation","transfer.p4":"Autre",
         "withdraw.sub":"Retirez vers PayPal, Cash App ou votre banque.","withdraw.bank":"Compte bancaire","withdraw.request":"Demander un retrait","withdraw.history":"Historique des retraits",
-        "cards.sub":"Demandez une carte virtuelle ou physique.","cards.apply":"Demander une carte","cards.submitApp":"Soumettre la demande","cards.yours":"Vos cartes et demandes","cards.empty":"Aucune carte pour le moment.",
+        "cards.sub":"Demandez une carte physique. Les prix et frais sont fixes en USD.","cards.apply":"Demander une carte","cards.submitApp":"Soumettre la demande","cards.yours":"Vos cartes et demandes","cards.empty":"Aucune carte pour le moment.",
         "loans.sub":"Demandez un prêt — les fonds arrivent une fois approuvés.","loans.amount":"Montant du prêt","loans.purpose":"Motif","loans.duration":"Durée","loans.income":"Revenu mensuel (facultatif)",
         "loans.apply":"Demander un prêt","loans.history":"Historique des prêts","loans.p1":"Affaires","loans.p2":"Éducation","loans.p3":"Médical","loans.p4":"Personnel",
         "history.title":"Historique des transactions","history.sub":"Chaque transaction de votre compte, de la première à la plus récente.","history.filterType":"Type","history.filterStatus":"Statut",
@@ -404,13 +415,62 @@ export function mountPage(navigate) {
         "history.title":"Akụkọ Azụmahịa","history.filterType":"Ụdị","history.filterStatus":"Ọkwa","history.allTypes":"Ụdị niile","history.allStatuses":"Ọkwa niile",
         "settings.theme":"Ọdịdị","settings.light":"Ìhè","settings.dark":"Ọchịchịrị",
         "settings.font":"Ụdị mkpụrụedemede","settings.language":"Asụsụ","common.cancel":"Kagbuo","common.edit":"Dezie","common.save":"Chekwaa" },
+      ja: { "nav.transfer":"振込","nav.withdraw":"出金","nav.deposit":"入金","nav.cards":"カード","nav.loans":"ローン","nav.history":"履歴","nav.settings":"設定","nav.profile":"プロフィール","nav.logout":"ログアウト",
+        "overview.title":"概要","overview.balance":"利用可能残高","overview.recent":"最近のアクティビティ","overview.viewAll":"すべて表示","overview.empty":"アクティビティはありません。",
+        "deposit.title":"入金","deposit.sub":"銀行振込または暗号資産で入金します。","deposit.bankTab":"銀行振込","deposit.cryptoTab":"暗号資産","deposit.history":"入金履歴",
+        "transfer.sub":"国内または海外へ送金します。","transfer.local":"国内送金","transfer.intl":"海外送金","transfer.bankName":"受取銀行名","transfer.acctNum":"受取口座番号","transfer.acctName":"口座名義","transfer.amount":"金額","transfer.narration":"メモ（任意）","transfer.send":"送金する","transfer.recName":"受取人の氏名","transfer.recCountry":"受取人の国","transfer.swift":"SWIFT / BICコード","transfer.iban":"IBAN / 口座番号","transfer.destCurrency":"送金先通貨","transfer.purpose":"送金目的","transfer.sendIntl":"海外送金する","transfer.history":"送金履歴",
+        "withdraw.sub":"PayPal、Cash App、または銀行口座へ出金します。","withdraw.request":"出金を申請","withdraw.history":"出金履歴",
+        "cards.sub":"物理カードを申し込みます。価格と手数料は米ドル固定です。","cards.apply":"カードを申し込む","cards.submitApp":"申し込みを送信","cards.yours":"カードと申請","cards.empty":"カードはまだありません。",
+        "loans.apply":"ローンを申し込む","loans.history":"ローン履歴","history.title":"取引履歴","history.sub":"アカウントのすべての取引です。","history.filterType":"種類","history.filterStatus":"ステータス","history.allTypes":"すべての種類","history.allStatuses":"すべてのステータス","history.stPending":"保留中","history.stApproved":"承認済み","history.stRejected":"却下",
+        "settings.sub":"ダッシュボードの表示をカスタマイズします。","settings.theme":"外観","settings.light":"ライト","settings.dark":"ダーク","settings.font":"フォント","settings.language":"言語","settings.pin":"取引PIN","profile.sub":"個人情報とアカウント情報。","common.select":"選択","common.cancel":"キャンセル","common.edit":"編集","common.save":"変更を保存" },
+      de: { "nav.transfer":"Überweisung","nav.withdraw":"Auszahlung","nav.deposit":"Einzahlung","nav.cards":"Karten","nav.loans":"Kredite","nav.history":"Verlauf","nav.settings":"Einstellungen","nav.profile":"Profil","nav.logout":"Abmelden",
+        "overview.title":"Übersicht","overview.balance":"Verfügbarer Kontostand","overview.recent":"Letzte Aktivitäten","overview.viewAll":"Alle anzeigen","overview.empty":"Noch keine Aktivitäten.",
+        "deposit.title":"Einzahlung","deposit.sub":"Laden Sie Ihr Konto per Banküberweisung oder Kryptowährung auf.","deposit.bankTab":"Banküberweisung","deposit.cryptoTab":"Krypto","deposit.history":"Einzahlungsverlauf",
+        "transfer.sub":"Senden Sie Geld im In- oder Ausland.","transfer.local":"Inlandsüberweisung","transfer.intl":"Internationale Überweisung","transfer.bankName":"Name der Empfängerbank","transfer.acctNum":"Empfängerkontonummer","transfer.acctName":"Name des Kontoinhabers","transfer.amount":"Betrag","transfer.narration":"Verwendungszweck (optional)","transfer.send":"Überweisung senden","transfer.recName":"Vollständiger Name des Empfängers","transfer.recCountry":"Land des Empfängers","transfer.swift":"SWIFT- / BIC-Code","transfer.iban":"IBAN / Kontonummer","transfer.destCurrency":"Zielwährung","transfer.purpose":"Überweisungszweck","transfer.sendIntl":"Internationale Überweisung senden","transfer.history":"Überweisungsverlauf",
+        "withdraw.sub":"Auszahlung auf PayPal, Cash App oder Ihr Bankkonto.","withdraw.request":"Auszahlung beantragen","withdraw.history":"Auszahlungsverlauf",
+        "cards.sub":"Physische Karte beantragen. Preise und Gebühren sind fest in USD.","cards.apply":"Karte beantragen","cards.submitApp":"Antrag absenden","cards.yours":"Ihre Karten und Anträge","cards.empty":"Noch keine Karten.",
+        "loans.apply":"Kredit beantragen","loans.history":"Kreditverlauf","history.title":"Transaktionsverlauf","history.sub":"Alle Transaktionen Ihres Kontos.","history.filterType":"Typ","history.filterStatus":"Status","history.allTypes":"Alle Typen","history.allStatuses":"Alle Status","history.stPending":"Ausstehend","history.stApproved":"Genehmigt","history.stRejected":"Abgelehnt",
+        "settings.sub":"Passen Sie die Darstellung Ihres Dashboards an.","settings.theme":"Darstellung","settings.light":"Hell","settings.dark":"Dunkel","settings.font":"Schriftart","settings.language":"Sprache","settings.pin":"Transaktions-PIN","profile.sub":"Ihre persönlichen und Kontodaten.","common.select":"Auswählen","common.cancel":"Abbrechen","common.edit":"Bearbeiten","common.save":"Änderungen speichern" },
+      es: { "nav.transfer":"Transferir","nav.withdraw":"Retirar","nav.deposit":"Depositar","nav.cards":"Tarjetas","nav.loans":"Préstamos","nav.history":"Historial","nav.settings":"Configuración","nav.profile":"Perfil","nav.logout":"Cerrar sesión",
+        "overview.title":"Resumen","overview.balance":"Saldo disponible","overview.recent":"Actividad reciente","overview.viewAll":"Ver todo","overview.empty":"Aún no hay actividad.",
+        "deposit.title":"Depósito","deposit.sub":"Añade fondos mediante transferencia bancaria o criptomonedas.","deposit.bankTab":"Transferencia bancaria","deposit.cryptoTab":"Cripto","deposit.history":"Historial de depósitos",
+        "transfer.sub":"Envía dinero a nivel local o internacional.","transfer.local":"Transferencia local","transfer.intl":"Transferencia internacional","transfer.bankName":"Banco del destinatario","transfer.acctNum":"Número de cuenta del destinatario","transfer.acctName":"Titular de la cuenta","transfer.amount":"Importe","transfer.narration":"Concepto (opcional)","transfer.send":"Enviar transferencia","transfer.recName":"Nombre completo del destinatario","transfer.recCountry":"País del destinatario","transfer.swift":"Código SWIFT / BIC","transfer.iban":"IBAN / número de cuenta","transfer.destCurrency":"Moneda de destino","transfer.purpose":"Motivo de la transferencia","transfer.sendIntl":"Enviar transferencia internacional","transfer.history":"Historial de transferencias",
+        "withdraw.sub":"Retira a PayPal, Cash App o tu cuenta bancaria.","withdraw.request":"Solicitar retiro","withdraw.history":"Historial de retiros",
+        "cards.sub":"Solicita una tarjeta física. Los precios y las comisiones son fijos en USD.","cards.apply":"Solicitar tarjeta","cards.submitApp":"Enviar solicitud","cards.yours":"Tus tarjetas y solicitudes","cards.empty":"Aún no tienes tarjetas.",
+        "loans.apply":"Solicitar préstamo","loans.history":"Historial de préstamos","history.title":"Historial de transacciones","history.sub":"Todas las transacciones de tu cuenta.","history.filterType":"Tipo","history.filterStatus":"Estado","history.allTypes":"Todos los tipos","history.allStatuses":"Todos los estados","history.stPending":"Pendiente","history.stApproved":"Aprobada","history.stRejected":"Rechazada",
+        "settings.sub":"Personaliza la apariencia de tu panel.","settings.theme":"Apariencia","settings.light":"Claro","settings.dark":"Oscuro","settings.font":"Fuente","settings.language":"Idioma","settings.pin":"PIN de transacciones","profile.sub":"Tus datos personales y de cuenta.","common.select":"Seleccionar","common.cancel":"Cancelar","common.edit":"Editar","common.save":"Guardar cambios" },
+      pt: { "nav.transfer":"Transferir","nav.withdraw":"Sacar","nav.deposit":"Depositar","nav.cards":"Cartões","nav.loans":"Empréstimos","nav.history":"Histórico","nav.settings":"Configurações","nav.profile":"Perfil","nav.logout":"Sair",
+        "overview.title":"Visão geral","overview.balance":"Saldo disponível","overview.recent":"Atividade recente","overview.viewAll":"Ver tudo","overview.empty":"Ainda não há atividades.",
+        "deposit.title":"Depósito","deposit.sub":"Adicione fundos por transferência bancária ou criptomoeda.","deposit.bankTab":"Transferência bancária","deposit.cryptoTab":"Cripto","deposit.history":"Histórico de depósitos",
+        "transfer.sub":"Envie dinheiro local ou internacionalmente.","transfer.local":"Transferência local","transfer.intl":"Transferência internacional","transfer.bankName":"Banco do destinatário","transfer.acctNum":"Número da conta do destinatário","transfer.acctName":"Titular da conta","transfer.amount":"Valor","transfer.narration":"Descrição (opcional)","transfer.send":"Enviar transferência","transfer.recName":"Nome completo do destinatário","transfer.recCountry":"País do destinatário","transfer.swift":"Código SWIFT / BIC","transfer.iban":"IBAN / número da conta","transfer.destCurrency":"Moeda de destino","transfer.purpose":"Finalidade da transferência","transfer.sendIntl":"Enviar transferência internacional","transfer.history":"Histórico de transferências",
+        "withdraw.sub":"Retire para PayPal, Cash App ou sua conta bancária.","withdraw.request":"Solicitar saque","withdraw.history":"Histórico de saques",
+        "cards.sub":"Solicite um cartão físico. Preços e tarifas fixos em USD.","cards.apply":"Solicitar cartão","cards.submitApp":"Enviar solicitação","cards.yours":"Seus cartões e solicitações","cards.empty":"Você ainda não tem cartões.",
+        "loans.apply":"Solicitar empréstimo","loans.history":"Histórico de empréstimos","history.title":"Histórico de transações","history.sub":"Todas as transações da sua conta.","history.filterType":"Tipo","history.filterStatus":"Status","history.allTypes":"Todos os tipos","history.allStatuses":"Todos os status","history.stPending":"Pendente","history.stApproved":"Aprovada","history.stRejected":"Rejeitada",
+        "settings.sub":"Personalize a aparência do seu painel.","settings.theme":"Aparência","settings.light":"Claro","settings.dark":"Escuro","settings.font":"Fonte","settings.language":"Idioma","settings.pin":"PIN de transação","profile.sub":"Seus dados pessoais e da conta.","common.select":"Selecionar","common.cancel":"Cancelar","common.edit":"Editar","common.save":"Salvar alterações" },
+      it: { "nav.transfer":"Trasferisci","nav.withdraw":"Preleva","nav.deposit":"Deposita","nav.cards":"Carte","nav.loans":"Prestiti","nav.history":"Cronologia","nav.settings":"Impostazioni","nav.profile":"Profilo","nav.logout":"Esci",
+        "overview.title":"Panoramica","overview.balance":"Saldo disponibile","overview.recent":"Attività recenti","overview.viewAll":"Visualizza tutto","overview.empty":"Nessuna attività.",
+        "deposit.title":"Deposito","deposit.sub":"Aggiungi fondi tramite bonifico bancario o criptovaluta.","deposit.bankTab":"Bonifico bancario","deposit.cryptoTab":"Criptovalute","deposit.history":"Cronologia depositi",
+        "transfer.sub":"Invia denaro localmente o all'estero.","transfer.local":"Bonifico nazionale","transfer.intl":"Bonifico internazionale","transfer.bankName":"Banca del destinatario","transfer.acctNum":"Numero di conto del destinatario","transfer.acctName":"Intestatario del conto","transfer.amount":"Importo","transfer.narration":"Causale (facoltativa)","transfer.send":"Invia bonifico","transfer.recName":"Nome completo del destinatario","transfer.recCountry":"Paese del destinatario","transfer.swift":"Codice SWIFT / BIC","transfer.iban":"IBAN / numero di conto","transfer.destCurrency":"Valuta di destinazione","transfer.purpose":"Motivo del bonifico","transfer.sendIntl":"Invia bonifico internazionale","transfer.history":"Cronologia bonifici",
+        "withdraw.sub":"Preleva su PayPal, Cash App o sul tuo conto bancario.","withdraw.request":"Richiedi prelievo","withdraw.history":"Cronologia prelievi",
+        "cards.sub":"Richiedi una carta fisica. Prezzi e commissioni fissi in USD.","cards.apply":"Richiedi carta","cards.submitApp":"Invia richiesta","cards.yours":"Le tue carte e richieste","cards.empty":"Non hai ancora carte.",
+        "loans.apply":"Richiedi prestito","loans.history":"Cronologia prestiti","history.title":"Cronologia transazioni","history.sub":"Tutte le transazioni del tuo conto.","history.filterType":"Tipo","history.filterStatus":"Stato","history.allTypes":"Tutti i tipi","history.allStatuses":"Tutti gli stati","history.stPending":"In sospeso","history.stApproved":"Approvata","history.stRejected":"Rifiutata",
+        "settings.sub":"Personalizza l'aspetto della dashboard.","settings.theme":"Aspetto","settings.light":"Chiaro","settings.dark":"Scuro","settings.font":"Carattere","settings.language":"Lingua","settings.pin":"PIN transazioni","profile.sub":"I tuoi dati personali e del conto.","common.select":"Seleziona","common.cancel":"Annulla","common.edit":"Modifica","common.save":"Salva modifiche" },
+      ar: { "nav.transfer":"تحويل","nav.withdraw":"سحب","nav.deposit":"إيداع","nav.cards":"البطاقات","nav.loans":"القروض","nav.history":"السجل","nav.settings":"الإعدادات","nav.profile":"الملف الشخصي","nav.logout":"تسجيل الخروج",
+        "overview.title":"نظرة عامة","overview.balance":"الرصيد المتاح","overview.recent":"النشاط الأخير","overview.viewAll":"عرض الكل","overview.empty":"لا توجد أنشطة بعد.",
+        "deposit.title":"إيداع","deposit.sub":"أضف أموالاً عبر التحويل البنكي أو العملات الرقمية.","deposit.bankTab":"تحويل بنكي","deposit.cryptoTab":"عملات رقمية","deposit.history":"سجل الإيداعات",
+        "transfer.sub":"أرسل الأموال محلياً أو دولياً.","transfer.local":"تحويل محلي","transfer.intl":"تحويل دولي","transfer.bankName":"اسم بنك المستلم","transfer.acctNum":"رقم حساب المستلم","transfer.acctName":"اسم صاحب الحساب","transfer.amount":"المبلغ","transfer.narration":"الوصف (اختياري)","transfer.send":"إرسال التحويل","transfer.recName":"الاسم الكامل للمستلم","transfer.recCountry":"بلد المستلم","transfer.swift":"رمز SWIFT / BIC","transfer.iban":"IBAN / رقم الحساب","transfer.destCurrency":"عملة الوجهة","transfer.purpose":"غرض التحويل","transfer.sendIntl":"إرسال تحويل دولي","transfer.history":"سجل التحويلات",
+        "withdraw.sub":"اسحب إلى PayPal أو Cash App أو حسابك البنكي.","withdraw.request":"طلب سحب","withdraw.history":"سجل السحب",
+        "cards.sub":"اطلب بطاقة فعلية. الأسعار والرسوم ثابتة بالدولار الأمريكي.","cards.apply":"طلب بطاقة","cards.submitApp":"إرسال الطلب","cards.yours":"بطاقاتك وطلباتك","cards.empty":"لا توجد بطاقات بعد.",
+        "loans.apply":"طلب قرض","loans.history":"سجل القروض","history.title":"سجل المعاملات","history.sub":"جميع المعاملات في حسابك.","history.filterType":"النوع","history.filterStatus":"الحالة","history.allTypes":"جميع الأنواع","history.allStatuses":"جميع الحالات","history.stPending":"قيد الانتظار","history.stApproved":"موافق عليه","history.stRejected":"مرفوض",
+        "settings.sub":"خصص مظهر لوحة التحكم.","settings.theme":"المظهر","settings.light":"فاتح","settings.dark":"داكن","settings.font":"الخط","settings.language":"اللغة","settings.pin":"رمز PIN للمعاملات","profile.sub":"بياناتك الشخصية وبيانات الحساب.","common.select":"اختيار","common.cancel":"إلغاء","common.edit":"تعديل","common.save":"حفظ التغييرات" },
     };
   
     function applyLanguage(lang) {
       const dict = I18N[lang] || I18N.en;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
       document.querySelectorAll("[data-i18n]").forEach((el) => {
         const key = el.dataset.i18n;
-        if (dict[key]) el.textContent = dict[key];
+        el.textContent = dict[key] || I18N.en[key] || el.textContent;
       });
       applyDepositSettingsToUI();
     }
@@ -704,7 +764,36 @@ export function mountPage(navigate) {
       });
       return txRef.key;
     }
-  
+
+    async function createPendingTransfer(payload) {
+      const amount = Number(payload.amount);
+      const balance = Number(userData.balance || 0);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        throw new Error("Enter a valid transfer amount.");
+      }
+      if (amount > balance) {
+        throw new Error("Your available balance has changed. Check your balance and try again.");
+      }
+
+      const txRef = push(ref(db, "transactions"));
+      const nextBalance = balance - amount;
+      await update(ref(db), {
+        [`users/${currentUid}/balance`]: nextBalance,
+        [`transactions/${txRef.key}`]: {
+          uid: currentUid,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+          balanceReserved: true,
+          ...payload,
+        },
+      });
+
+      userData.balance = nextBalance;
+      const balanceDisplay = $("balanceDisplay");
+      if (balanceDisplay) balanceDisplay.textContent = fmtMoney(nextBalance, userData.currency);
+      return txRef.key;
+    }
+
     function statusPill(status) {
       const map = { pending: ["pill-pending", "Pending"], approved: ["pill-approved", "Approved"], rejected: ["pill-rejected", "Rejected"] };
       const [cls, label] = map[status] || map.pending;
@@ -790,6 +879,11 @@ export function mountPage(navigate) {
     }
     function setFieldErr(errorId, msg) {
       const el = $(errorId);
+      if (!el) {
+        console.error(`Could not display field validation error: element "${errorId}" is missing.`);
+        if (msg) showToast(msg, "rose");
+        return;
+      }
       if (msg) { el.textContent = msg; el.classList.remove("hidden"); } else { el.classList.add("hidden"); }
     }
   
@@ -833,14 +927,19 @@ export function mountPage(navigate) {
       const amount = validateAmount("ltAmount", "ltAmountError", userData.balance || 0);
       if (!amount) return;
       requireTransactionPin(async () => {
-        await createTransaction({
-          type: "transfer_local", direction: "debit", amount, currency: userData.currency,
-          description: `Local transfer to ${$("ltAccountName").value.trim()}`,
-          details: { bankName: $("ltBankName").value.trim(), accountNumber: $("ltAccountNumber").value.trim(), accountName: $("ltAccountName").value.trim(), narration: $("ltNarration").value.trim() },
-        });
-        $("localTransferForm").reset();
-        setAlert($("transferAlert"), "Transfer submitted — pending admin approval.", "mint");
-        showToast("Transfer submitted", "mint");
+        try {
+          await createPendingTransfer({
+            type: "transfer_local", direction: "debit", amount, currency: userData.currency,
+            description: `Local transfer to ${$("ltAccountName").value.trim()}`,
+            details: { bankName: $("ltBankName").value.trim(), accountNumber: $("ltAccountNumber").value.trim(), accountName: $("ltAccountName").value.trim(), narration: $("ltNarration").value.trim() },
+          });
+          $("localTransferForm").reset();
+          setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
+          showToast("Transfer submitted", "mint");
+        } catch (error) {
+          console.error("Could not submit local transfer:", error);
+          setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
+        }
       });
     });
   
@@ -850,14 +949,19 @@ export function mountPage(navigate) {
       const amount = validateAmount("itAmount", "itAmountError", userData.balance || 0);
       if (!amount) return;
       requireTransactionPin(async () => {
-        await createTransaction({
-          type: "transfer_international", direction: "debit", amount, currency: userData.currency,
-          description: `International transfer to ${$("itName").value.trim()} (${$("itCountry").value})`,
-          details: { recipientName: $("itName").value.trim(), recipientCountry: $("itCountry").value, bankName: $("itBankName").value.trim(), swift: $("itSwift").value.trim(), accountNumber: $("itAccountNumber").value.trim(), destCurrency: $("itCurrency").value, purpose: $("itPurpose").value },
-        });
-        $("intlTransferForm").reset();
-        setAlert($("transferAlert"), "International transfer submitted — pending admin approval.", "mint");
-        showToast("Transfer submitted", "mint");
+        try {
+          await createPendingTransfer({
+            type: "transfer_international", direction: "debit", amount, currency: userData.currency,
+            description: `International transfer to ${$("itName").value.trim()} (${$("itCountry").value})`,
+            details: { recipientName: $("itName").value.trim(), recipientCountry: $("itCountry").value, bankName: $("itBankName").value.trim(), swift: $("itSwift").value.trim(), accountNumber: $("itAccountNumber").value.trim(), destCurrency: $("itCurrency").value, purpose: $("itPurpose").value },
+          });
+          $("intlTransferForm").reset();
+          setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
+          showToast("Transfer submitted", "mint");
+        } catch (error) {
+          console.error("Could not submit international transfer:", error);
+          setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
+        }
       });
     });
   
@@ -903,11 +1007,21 @@ export function mountPage(navigate) {
       e.preventDefault();
       const typeId = $("cardApplyForm").dataset.typeId;
       const type = CARD_TYPES.find((c) => c.id === typeId);
-      if (type.fee > (userData.balance || 0)) { setAlert($("cardsAlert"), "Your balance may not cover this card's fee — the fee is charged when your card is approved.", "rose"); }
+      const fee = Number($("cardApplyForm").dataset.fee);
+      const currency = $("cardApplyForm").dataset.currency;
+      if (currency !== "USD" || userData.currency !== "USD") {
+        setAlert($("cardsAlert"), "Card fees are charged in USD. Set your account currency to USD before applying; no currency conversion is applied.", "rose");
+        return;
+      }
+      if (!Number.isFinite(fee) || !type) {
+        setAlert($("cardsAlert"), "Current card pricing is unavailable. Please try again later.", "rose");
+        return;
+      }
+      if (fee > (userData.balance || 0)) { setAlert($("cardsAlert"), "Your balance may not cover this card's fee — the fee is charged when your card is approved.", "rose"); }
       await createTransaction({
-        type: "card_application", direction: "debit", amount: type.fee, currency: userData.currency,
+        type: "card_application", direction: "debit", amount: fee, currency,
         description: `${type.name} application`,
-        details: { cardTypeId: type.id, cardTypeName: type.name, cardholderName: $("cardholderName").value.trim(), billingAddress: $("cardBillingAddress").value.trim() },
+        details: { cardTypeId: type.id, cardTypeName: type.name, cardholderName: $("cardholderName").value.trim(), billingAddress: $("cardBillingAddress").value.trim(), basePriceUsd: type.fee },
       });
       $("cardApplyForm").classList.add("hidden");
       $("cardApplyForm").reset();
@@ -1011,7 +1125,7 @@ export function mountPage(navigate) {
         }
         $("suspendedGate").classList.add("hidden");
         $("appShell").classList.remove("hidden");
-  
+
         paintOverviewFromUserData();
         fillProfileForm();
         const settings = userData.settings || {};

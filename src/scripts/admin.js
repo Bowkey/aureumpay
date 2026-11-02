@@ -370,8 +370,10 @@ export function mountPage() {
       if (decision === "approved") {
         let newBalance = Number(user.balance || 0);
         if (tx.direction === "credit") newBalance += Number(tx.amount || 0);
-        else if (tx.direction === "debit") newBalance -= Number(tx.amount || 0);
-        updates[`users/${uid}/balance`] = newBalance;
+        else if (tx.direction === "debit" && !tx.balanceReserved) newBalance -= Number(tx.amount || 0);
+        if (tx.direction === "credit" || (tx.direction === "debit" && !tx.balanceReserved)) {
+          updates[`users/${uid}/balance`] = newBalance;
+        }
   
         if (tx.type === "card_application") {
           const last4 = String(Math.floor(1000 + Math.random() * 9000));
@@ -383,6 +385,8 @@ export function mountPage() {
             issuedAt: new Date().toISOString(),
           };
         }
+      } else if (tx.balanceReserved && tx.direction === "debit") {
+        updates[`users/${uid}/balance`] = Number(user.balance || 0) + Number(tx.amount || 0);
       }
   
       try {

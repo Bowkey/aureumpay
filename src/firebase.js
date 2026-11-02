@@ -5,12 +5,12 @@ const env = import.meta.env;
 export const firebaseConfig = {
 
   apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyCrBn-SGY7W0m1z0O7wtCq2OAl_eNSkSmA",
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "aureumpay-28c7a.firebaseapp.com",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
   databaseURL: env.VITE_FIREBASE_DATABASE_URL,
   projectId: env.VITE_FIREBASE_PROJECT_ID || "aureumpay-28c7a",
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "aureumpay-28c7a.firebasestorage.app",
   messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "698444813351",
-  appId: env.VITE_FIREBASE_APP_ID || "1:698444813351:web:ffc82dfd1ea2a6a648ea02",
+  appId: env.VITE_FIREBASE_APP_ID
 };
 
 const requiredConfigKeys = ["apiKey", "authDomain", "databaseURL", "projectId", "appId"];
