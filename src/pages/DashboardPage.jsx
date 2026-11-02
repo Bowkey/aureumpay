@@ -133,13 +133,13 @@ export default function DashboardPage() {
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M7 7h13M7 7l4-4M7 7l4 4M17 17H4M17 17l-4-4M17 17l-4 4"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="nav.transfer">Transfer</span>
           </button>
-          <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="withdraw">
+          {/* <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="withdraw">
             <span id="qaWithdrawLock" className="hidden absolute top-2 right-2 w-5 h-5 rounded-full items-center justify-center" style={{background: 'rgba(201,138,44,.15)'}}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </span>
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="nav.withdraw">Withdraw</span>
-          </button>
+          </button> */}
           <button className="quick-action surface p-4 flex flex-col items-center gap-2 text-center" data-goto="cards">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563C8" strokeWidth="2"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 9.5h19"/></svg>
             <span className="text-[12.5px] font-medium" data-i18n="cards.apply">Apply for card</span>
