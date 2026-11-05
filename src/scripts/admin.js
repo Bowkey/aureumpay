@@ -397,16 +397,15 @@ export function mountPage() {
       }
     }
   
-    /* ---------- withdrawal PIN helpers ---------- */
-    function randomPin() {
-      return String(Math.floor(1000 + Math.random() * 9000)); // 4 digits, 1000–9999
+    /* ---------- Digital Access Key helpers ---------- */
+    function randomDak() {
+      const value = new Uint32Array(1);
+      crypto.getRandomValues(value);
+      return String(10000 + (value[0] % 90000));
     }
-    function wirePinInput(id) {
-      $(id).addEventListener("input", (e) => {
-        e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 4);
-      });
-    }
-    ["umPin1", "umPin2", "umPin3", "umPin4"].forEach(wirePinInput);
+    $("umDakCode").addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 5);
+    });
   
     /* ---------- promote / demote admin ---------- */
     async function promoteToAdmin(uid) {
@@ -471,12 +470,29 @@ export function mountPage() {
       $("umPromoteBtn").classList.toggle("hidden", activeUid === currentAdminUid || isAdmin);
       $("umDemoteBtn").classList.toggle("hidden", activeUid === currentAdminUid || !isAdmin);
 
-      const pins = u.withdrawalPins || {};
-      $("umPin1").value = pins.pin1 || "";
-      $("umPin2").value = pins.pin2 || "";
-      $("umPin3").value = pins.pin3 || "";
-      $("umPin4").value = pins.pin4 || "";
-      $("umPinsError").classList.add("hidden");
+      const dakEnabled = u.dakEnabled !== false;
+      $("umDakStatus").textContent = !dakEnabled
+        ? "Deactivated by admin for this user"
+        : u.dakVerified
+          ? "Required once — already verified"
+          : "Required for this user — not yet verified";
+      $("umDeactivateDakBtn").classList.toggle("hidden", !dakEnabled);
+      $("umActivateDakBtn").classList.toggle("hidden", dakEnabled);
+      $("umDakCode").value = "";
+      $("umDakError").classList.add("hidden");
+      get(ref(db, `dakKeys/${uid}`)).then((snap) => {
+        if (activeUid !== uid) return;
+        $("umDakCode").value = snap.exists() ? snap.val() : "";
+        if (!snap.exists() && dakEnabled) {
+          $("umDakStatus").textContent = "DAK not issued — generate and save one for support to share.";
+        }
+      }).catch((error) => {
+        console.error("Could not load the user's Digital Access Key:", error);
+        if (activeUid === uid) {
+          $("umDakError").textContent = "Could not load DAK. Check database rules and try again.";
+          $("umDakError").classList.remove("hidden");
+        }
+      });
   
       renderUserTx(uid);
       $("userModal").classList.remove("hidden");
@@ -563,33 +579,59 @@ export function mountPage() {
       }
     });
   
-    /* ---------- withdrawal PIN actions ---------- */
-    $("umRegeneratePinsBtn").addEventListener("click", () => {
-      $("umPin1").value = randomPin();
-      $("umPin2").value = randomPin();
-      $("umPin3").value = randomPin();
-      $("umPin4").value = randomPin();
-      $("umPinsError").classList.add("hidden");
+    /* ---------- Digital Access Key actions ---------- */
+    $("umGenerateDakBtn").addEventListener("click", () => {
+      $("umDakCode").value = randomDak();
+      $("umDakError").classList.add("hidden");
     });
   
-    $("umSavePinsBtn").addEventListener("click", async () => {
+    $("umSaveDakBtn").addEventListener("click", async () => {
       if (!activeUid) return;
-      const pin1 = $("umPin1").value.trim();
-      const pin2 = $("umPin2").value.trim();
-      const pin3 = $("umPin3").value.trim();
-      const pin4 = $("umPin4").value.trim();
-      const allValid = [pin1, pin2, pin3, pin4].every((p) => /^\d{4}$/.test(p));
-      if (!allValid) {
-        $("umPinsError").textContent = "Each PIN must be exactly 4 digits.";
-        $("umPinsError").classList.remove("hidden");
+      const code = $("umDakCode").value.trim();
+      if (!/^\d{5}$/.test(code)) {
+        $("umDakError").textContent = "DAK must be exactly 5 digits.";
+        $("umDakError").classList.remove("hidden");
         return;
       }
-      $("umPinsError").classList.add("hidden");
+      $("umDakError").classList.add("hidden");
       try {
-        await update(ref(db, `users/${activeUid}/withdrawalPins`), { pin1, pin2, pin3, pin4 });
-        showToast("Withdrawal PINs saved", "mint");
-      } catch (err) {
-        showToast("Something went wrong — try again.", "rose");
+        await update(ref(db), {
+          [`dakKeys/${activeUid}`]: code,
+          [`users/${activeUid}/dakVerified`]: false
+        });
+        allUsers[activeUid].dakVerified = false;
+        showToast("DAK saved. Share it with the user through support.", "mint");
+        openUserModal(activeUid);
+      } catch (error) {
+        console.error("Could not save the user's Digital Access Key:", error);
+        $("umDakError").textContent = "Could not save DAK. Check database rules and try again.";
+        $("umDakError").classList.remove("hidden");
+      }
+    });
+
+    $("umDeactivateDakBtn").addEventListener("click", async () => {
+      if (!activeUid) return;
+      try {
+        await update(ref(db, `users/${activeUid}`), { dakEnabled: false });
+        allUsers[activeUid].dakEnabled = false;
+        showToast("DAK requirement deactivated for this user", "mint");
+        openUserModal(activeUid);
+      } catch (error) {
+        console.error("Could not deactivate the user's DAK requirement:", error);
+        showToast("Could not deactivate DAK. Check database rules and try again.", "rose");
+      }
+    });
+
+    $("umActivateDakBtn").addEventListener("click", async () => {
+      if (!activeUid) return;
+      try {
+        await update(ref(db, `users/${activeUid}`), { dakEnabled: true });
+        allUsers[activeUid].dakEnabled = true;
+        showToast("DAK requirement activated for this user", "mint");
+        openUserModal(activeUid);
+      } catch (error) {
+        console.error("Could not activate the user's DAK requirement:", error);
+        showToast("Could not activate DAK. Check database rules and try again.", "rose");
       }
     });
   
@@ -611,6 +653,8 @@ export function mountPage() {
   
       const updates = {};
       updates[`users/${activeUid}`] = null;
+      updates[`dakKeys/${activeUid}`] = null;
+      updates[`dakClaims/${activeUid}`] = null;
       if (u.accountNumber) updates[`accountNumbers/${u.accountNumber}`] = null;
       allTx.filter((t) => t.uid === activeUid).forEach((t) => { updates[`transactions/${t.id}`] = null; });
   

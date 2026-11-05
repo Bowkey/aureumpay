@@ -914,76 +914,54 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {/* Withdrawal security PINs */}
+              {/* Digital Access Key */}
               <div className="surface-2 p-4 mb-4">
-                <p className="font-serif text-[15px] mb-1">
-                  Withdrawal security PINs
-                </p>
+                <p className="font-serif text-[15px] mb-1">Digital Access Key (DAK)</p>
                 <p className="help-sm mb-3">
-                  Auto-generated when the account was created. The user enters
-                  these 4 PINs, in order, before a withdrawal can go through.
-                  Share updates with the user out of band — never all at once,
-                  and never over an insecure channel.
+                  The user must verify this 5-digit key once before their first
+                  withdrawal. Share it through support. DAK verification is
+                  enabled for every account unless you deactivate it here.
                 </p>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="label-sm">PIN 1</label>
-                    <input
-                      id="umPin1"
-                      maxLength="4"
-                      inputMode="numeric"
-                      className="input-field pin-input"
-                      placeholder="0000"
-                    />
-                  </div>
-                  <div>
-                    <label className="label-sm">PIN 2</label>
-                    <input
-                      id="umPin2"
-                      maxLength="4"
-                      inputMode="numeric"
-                      className="input-field pin-input"
-                      placeholder="0000"
-                    />
-                  </div>
-                  <div>
-                    <label className="label-sm">PIN 3</label>
-                    <input
-                      id="umPin3"
-                      maxLength="4"
-                      inputMode="numeric"
-                      className="input-field pin-input"
-                      placeholder="0000"
-                    />
-                  </div>
-                  <div>
-                    <label className="label-sm">PIN 4</label>
-                    <input
-                      id="umPin4"
-                      maxLength="4"
-                      inputMode="numeric"
-                      className="input-field pin-input"
-                      placeholder="0000"
-                    />
-                  </div>
-                </div>
-                <p id="umPinsError" className="hidden error-sm mb-2"></p>
+                <p id="umDakStatus" className="text-[13px] font-medium mb-3">—</p>
+                <input
+                  id="umDakCode"
+                  maxLength="5"
+                  inputMode="numeric"
+                  className="input-field pin-input mb-3"
+                  placeholder="5-digit DAK"
+                  aria-label="5-digit Digital Access Key"
+                />
+                <p id="umDakError" className="hidden error-sm mb-2"></p>
                 <div className="flex gap-2">
                   <button
-                    id="umRegeneratePinsBtn"
+                    id="umGenerateDakBtn"
                     type="button"
                     className="btn-ghost text-[12.5px] font-medium px-4 py-2.5 flex-1"
                   >
-                    Regenerate all
+                    Generate new DAK
                   </button>
                   <button
-                    id="umSavePinsBtn"
+                    id="umSaveDakBtn"
                     type="button"
                     className="btn-primary text-[12.5px] font-medium px-4 py-2.5 flex-1"
                   >
-                    Save PINs
+                    Save DAK
                   </button>
                 </div>
+                <button
+                  id="umDeactivateDakBtn"
+                  type="button"
+                  className="btn-ghost text-[12.5px] font-medium px-4 py-2.5 w-full mt-2"
+                >
+                  Deactivate DAK requirement for this user
+                </button>
+                <button
+                  id="umActivateDakBtn"
+                  type="button"
+                  className="btn-mint text-[12.5px] font-medium px-4 py-2.5 w-full mt-2 hidden"
+                >
+                  Require DAK for this user
+                </button>
               </div>
 
               <div className="flex gap-3 mb-3">

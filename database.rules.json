@@ -24,9 +24,35 @@
           ".validate": "auth.token.admin === true"
         },
 
+        "dakEnabled": {
+          ".validate": "newData.isBoolean() && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || (!data.exists() && auth.uid === $uid && newData.val() === true))"
+        },
+
+        "dakVerified": {
+          ".validate": "newData.isBoolean() && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || (!data.exists() && auth.uid === $uid && newData.val() === false) || (auth.uid === $uid && newData.val() === true && root.child('dakClaims').child($uid).val() === root.child('dakKeys').child($uid).val()))"
+        },
+
         "balance": {
           ".validate": "newData.isNumber() && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || data.val() === newData.val() || (auth.uid === $uid && data.isNumber() && newData.val() >= 0 && newData.val() < data.val()) || (!data.exists() && newData.val() === 0))"
         }
+      }
+    },
+
+    "dakKeys": {
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)",
+      "$uid": {
+        ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)",
+        ".write": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || (auth.uid === $uid && !data.exists()))",
+        ".validate": "newData.isString() && newData.val().matches(/^[0-9]{5}$/)"
+      }
+    },
+
+    "dakClaims": {
+      ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)",
+      "$uid": {
+        ".read": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true)",
+        ".write": "auth != null && (auth.token.admin === true || root.child('admins').child(auth.uid).child('enabled').val() === true || (auth.uid === $uid && (!newData.exists() || (newData.isString() && newData.val().matches(/^[0-9]{5}$/) && newData.val() === root.child('dakKeys').child($uid).val()))))",
+        ".validate": "newData.isString() && newData.val().matches(/^[0-9]{5}$/) && newData.val() === root.child('dakKeys').child($uid).val()"
       }
     },
 

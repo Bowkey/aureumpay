@@ -6,7 +6,7 @@ import {
 import {
     getDatabase,
     ref,
-    set,
+    update,
     get
   } from "firebase/database";
 
@@ -230,21 +230,10 @@ export function mountPage() {
       return String(Date.now()).slice(-10);
     }
   
-    // ---------- withdrawal PIN generation ----------
-    // Four separate 4-digit PINs, entered one after another (in order) only when the
-    // user withdraws money. They're generated automatically at signup so the user
-    // never has to invent or remember them themselves — admin can view and reissue
-    // them from the admin dashboard, and shares them with the user out of band.
-    function randomFourDigitPin(){
-      return String(Math.floor(1000 + Math.random() * 9000));
-    }
-    function generateWithdrawalPins(){
-      return {
-        pin1: randomFourDigitPin(),
-        pin2: randomFourDigitPin(),
-        pin3: randomFourDigitPin(),
-        pin4: randomFourDigitPin(),
-      };
+    function generateDigitalAccessKey(){
+      const value = new Uint32Array(1);
+      crypto.getRandomValues(value);
+      return String(10000 + (value[0] % 90000));
     }
   
     // ---------- final submit ----------
@@ -298,15 +287,16 @@ export function mountPage() {
           // New accounts start inactive — an admin must review and approve the
           // account before deposits, transfers, or withdrawals can be made.
           active: false,
-          // Auto-generated, sequential withdrawal PINs. Only used (and only ever
-          // needed) during a withdrawal; transfers keep using the PIN the user
-          // sets themselves inside the dashboard.
-          withdrawalPins: generateWithdrawalPins(),
+          dakEnabled: true,
+          dakVerified: false,
           createdAt: new Date().toISOString()
         };
   
-        await set(ref(db, `users/${uid}`), profile);
-        await set(ref(db, `accountNumbers/${accountNumber}`), uid);
+        await update(ref(db), {
+          [`users/${uid}`]: profile,
+          [`accountNumbers/${accountNumber}`]: uid,
+          [`dakKeys/${uid}`]: generateDigitalAccessKey()
+        });
   
         $('successFirstName').textContent = profile.firstName || 'there';
         $('successAccountNumber').textContent = formatAccountNumber(accountNumber);

