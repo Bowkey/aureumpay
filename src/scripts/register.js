@@ -9,6 +9,7 @@ import {
     update,
     get
   } from "firebase/database";
+import { sendEmailNotification } from "../utils/email-notifications.js";
 
 export function mountPage() {
   // ---- Replace with your own Firebase project config ----
@@ -297,9 +298,19 @@ export function mountPage() {
           [`accountNumbers/${accountNumber}`]: uid,
           [`dakKeys/${uid}`]: generateDigitalAccessKey()
         });
+
+        let notificationError = "";
+        try {
+          await sendEmailNotification(cred.user, { type: "registration" });
+        } catch (error) {
+          console.error("Account was created, but its registration email could not be sent:", error);
+          notificationError = " Your account was created, but we couldn't send the confirmation email. Please contact support.";
+        }
   
         $('successFirstName').textContent = profile.firstName || 'there';
         $('successAccountNumber').textContent = formatAccountNumber(accountNumber);
+        $('successEmailNotice').textContent = notificationError;
+        $('successEmailNotice').classList.toggle('hidden', !notificationError);
         $('successOverlay').classList.add('show');
   
       } catch(err){

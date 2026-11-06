@@ -2,6 +2,7 @@ import { app, isFirebaseConfigured } from "../firebase.js";
 import { bindContactDetails } from "../utils/contact.js";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { getDatabase, ref, onValue, update, push, set, remove, query, orderByChild, equalTo } from "firebase/database";
+import { sendEmailNotification } from "../utils/email-notifications.js";
 
 export function mountPage(navigate) {
     if (!isFirebaseConfigured) {
@@ -719,7 +720,7 @@ export function mountPage(navigate) {
       $("acctStatusDot").style.background = isActive ? "#4B8EF5" : "#F2A2A2";
       $("acctStatusText").textContent = isActive ? "Active" : "Inactive";
   
-      ["qaDepositLock", "qaTransferLock", "qaWithdrawLock"].forEach((id) => {
+      ["qaDepositLock", "qaTransferLock"].forEach((id) => {
         $(id).classList.toggle("hidden", isActive);
         $(id).classList.toggle("flex", !isActive);
       });
@@ -746,6 +747,17 @@ export function mountPage(navigate) {
       return txRef.key;
     }
 
+    async function notifyEmail(payload) {
+      try {
+        await sendEmailNotification(auth.currentUser, payload);
+        return true;
+      } catch (error) {
+        console.error("Email notification failed after the account change was saved:", error);
+        showToast("Your request was saved, but its email notification could not be sent.", "rose");
+        return false;
+      }
+    }
+
     async function createPendingTransfer(payload) {
       const amount = Number(payload.amount);
       const balance = Number(userData.balance || 0);
@@ -770,6 +782,10 @@ export function mountPage(navigate) {
       });
 
       userData.balance = nextBalance;
+      await Promise.all([
+        notifyEmail({ type: "transfer", transactionId: txRef.key }),
+        notifyEmail({ type: "balance", transactionId: txRef.key }),
+      ]);
       const balanceDisplay = $("balanceDisplay");
       if (balanceDisplay) balanceDisplay.textContent = fmtMoney(nextBalance, userData.currency);
       return txRef.key;
@@ -1050,16 +1066,20 @@ export function mountPage(navigate) {
       paintOverviewFromUserData();
     });
     function fillProfileForm() {
-      $("pFullName").value = userData.fullName || "";
-      $("pEmail").value = userData.email || "";
+      const address = userData.address && typeof userData.address === "object" ? userData.address : {};
+      const fullName = userData.fullName || [userData.firstName, userData.lastName].filter(Boolean).join(" ");
+      $("pFullName").value = fullName;
+      $("pEmail").value = userData.email || auth.currentUser?.email || "";
       $("pPhone").value = userData.phone || "";
       $("pDob").value = userData.dob || "";
-      $("pCountry").value = userData.country || "";
+      $("pCountry").value = userData.country || userData.countryResidence || address.country || "";
       $("pCurrency").value = userData.currency || "";
-      $("pAddress").value = userData.address || "";
-      $("pCity").value = userData.city || "";
-      $("pState").value = userData.state || "";
-      $("pPostal").value = userData.postalCode || "";
+      $("pAddress").value = typeof userData.address === "string"
+        ? userData.address
+        : [address.line1, address.line2].filter(Boolean).join(", ");
+      $("pCity").value = userData.city || address.city || "";
+      $("pState").value = userData.state || address.state || "";
+      $("pPostal").value = userData.postalCode || address.postalCode || "";
       $("pEmployment").value = userData.employmentStatus || "";
       $("pOccupation").value = userData.occupation || "";
     }
@@ -1085,7 +1105,7 @@ export function mountPage(navigate) {
     onAuthStateChanged(auth, (user) => {
       if (!user) { navigate("/login"); return; }
       currentUid = user.uid;
-  
+
       if (!settingsListenerAttached) {
         settingsListenerAttached = true;
         onValue(ref(db, "settings/deposit"), (snap) => {

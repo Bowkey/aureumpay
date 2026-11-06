@@ -8,16 +8,16 @@
     "build": "vite build",
     "preview": "vite preview",
     "set-admin": "node scripts/set-admin.js",
-    "db:deploy": "firebase deploy --only database"
+    "db:deploy": "firebase deploy --project aureumpay-28c7a --only database"
   },
   "dependencies": {
     "firebase": "^12.11.0",
+    "firebase-admin": "^14.5.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
-    "firebase-admin": "^14.5.0",
     "prettier": "^3.9.10",
     "vite": "^8.3.5"
   }

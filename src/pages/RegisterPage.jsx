@@ -299,6 +299,7 @@ export default function RegisterPage() {
     <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--leaf)] mb-3">Account created</p>
     <h2 className="font-serif text-3xl tracking-tight mb-3">Welcome to Aureumpay, <span id="successFirstName" style={{color: 'var(--leaf)'}}>there</span>.</h2>
     <p className="text-sm text-[var(--forest)]/60 mb-7">Your account number has been generated. Keep it somewhere safe — you'll need it for transfers. Your account starts <strong>inactive</strong> until our team reviews and approves it.</p>
+    <p id="successEmailNotice" className="hidden text-sm text-[var(--error)] mb-5"></p>
 
     <div className="border border-[var(--line)] rounded-md p-5 mb-8" style={{background: 'var(--paper-2)'}}>
       <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--forest)]/45 mb-2">Account number</p>

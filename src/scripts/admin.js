@@ -1,6 +1,7 @@
 import { app, isFirebaseConfigured, isAdminEmail } from "../firebase.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getDatabase, ref, onValue, update, remove, get, set } from "firebase/database";
+import { sendEmailNotification } from "../utils/email-notifications.js";
 
 export function mountPage() {
   const ADMIN_EMAIL = "admin@gmail.com";
@@ -391,6 +392,15 @@ export function mountPage() {
   
       try {
         await update(ref(db), updates);
+        if (Object.prototype.hasOwnProperty.call(updates, `users/${uid}/balance`)) {
+          try {
+            await sendEmailNotification(auth.currentUser, { type: "balance", transactionId: txId });
+          } catch (notificationError) {
+            console.error("Transaction was reviewed, but its balance email could not be sent:", notificationError);
+            showToast("Transaction updated, but the balance email notification could not be sent.", "rose");
+            return;
+          }
+        }
         showToast(decision === "approved" ? "Transaction approved" : "Transaction rejected", decision === "approved" ? "mint" : "rose");
       } catch (err) {
         showToast("Something went wrong — try again.", "rose");
@@ -558,16 +568,24 @@ export function mountPage() {
       const isRefund = action === "refund";
       const note = $("umAdjustNote").value.trim();
       const timestamp = new Date().toISOString();
+      const transactionId = `admin_${Date.now()}`;
   
       const updates = {};
       updates[`users/${activeUid}/balance`] = newBalance;
-      updates[`transactions/admin_${Date.now()}`] = {
+      updates[`transactions/${transactionId}`] = {
         uid: activeUid, type: isRefund ? "admin_refund" : "admin_adjustment", direction, amount, currency: user.currency,
         description: note || (isRefund ? "Refund issued" : direction === "credit" ? "Admin credit" : "Admin debit"),
         status: "approved", createdAt: timestamp, reviewedAt: timestamp,
       };
       try {
         await update(ref(db), updates);
+        try {
+          await sendEmailNotification(auth.currentUser, { type: "balance", transactionId });
+        } catch (notificationError) {
+          console.error("Balance was updated, but its email notification could not be sent:", notificationError);
+          showToast("Balance updated, but its email notification could not be sent.", "rose");
+          return;
+        }
         showToast(isRefund ? "Refund issued" : "Balance updated", "mint");
         $("umAdjustAmount").value = "";
         $("umAdjustNote").value = "";
